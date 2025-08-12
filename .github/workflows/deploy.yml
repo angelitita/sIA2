@@ -40,10 +40,7 @@ jobs:
 
       # 5. Configura Git y sube los nuevos archivos generados al repositorio
       - name: Hacer commit de los archivos generados
-        run: |
-          git config --global user.name 'sIA Bot'
-          git config --global user.email 'bot@sia-news.com'
-          git add -A
-          # Solo hace commit si hay cambios (evita commits vacíos)
-          git diff --quiet || git commit -m "🤖 Nuevo post automatizado: $(date)"
-          git push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "🤖 Nuevo post automatizado: $(date)"
+          token: ${{ secrets.PAT }}
