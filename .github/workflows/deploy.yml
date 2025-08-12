@@ -7,7 +7,10 @@ on:
   # Para 3-5 posts al día, puedes ajustar esto. Por ejemplo, `*/4` para cada 4 horas.
   schedule:
     - cron: '0 */6 * * *'
-
+    
+permissions:
+  contents: write
+  
 jobs:
   build-and-commit:
     runs-on: ubuntu-latest
