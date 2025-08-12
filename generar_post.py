@@ -6,14 +6,15 @@ from pathlib import Path
 
 # --- Configuración ---
 # Carga la API Key desde un archivo .env para seguridad
-# Crea un archivo llamado .env y pon: GEMINI_API_KEY="TU_API_KEY_AQUI"
+# Para GitHub Actions, la clave se pasa como un "secret"
 from dotenv import load_dotenv
 load_dotenv()
 
+# Configuración de la API de Gemini
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-# Rutas de las carpetas
+# Rutas de las carpetas (usando pathlib para compatibilidad)
 POSTS_DIR = Path("posts")
 TEMPLATES_DIR = Path("templates")
 ROOT_DIR = Path(".")
@@ -23,7 +24,6 @@ ROOT_DIR = Path(".")
 def generar_contenido_ia():
     """Genera el contenido de un nuevo artículo usando la API de Gemini."""
     
-    # Prompt optimizado para obtener una respuesta estructurada en JSON
     prompt = """
     Actúa como un periodista experto en tecnología e inteligencia artificial, con un enfoque en Latinoamérica.
     Tu tarea es generar un artículo de noticias completo y original sobre un tema de actualidad en IA relevante para la región.
@@ -47,7 +47,6 @@ def generar_contenido_ia():
     try:
         print("🤖 Generando nuevo contenido con la API de Gemini...")
         response = model.generate_content(prompt)
-        # Limpiar la respuesta para que sea un JSON válido
         json_response = response.text.strip().replace("```json", "").replace("```", "")
         contenido = json.loads(json_response)
         print(f"✅ Contenido generado con éxito: '{contenido['title']}'")
@@ -58,8 +57,10 @@ def generar_contenido_ia():
 
 def crear_archivo_post(contenido):
     """Crea un nuevo archivo HTML para el post a partir de una plantilla."""
-POSTS_DIR.mkdir(exist_ok=True)
     
+    # Asegurarse de que el directorio 'posts' exista antes de guardar.
+    POSTS_DIR.mkdir(exist_ok=True)
+
     # Cargar la plantilla del artículo
     with open(TEMPLATES_DIR / "template_article.html", "r", encoding="utf-8") as f:
         template_str = f.read()
@@ -72,7 +73,7 @@ POSTS_DIR.mkdir(exist_ok=True)
     template_str = template_str.replace("{{CONTENIDO_HTML}}", contenido["content_html"])
     
     # Crear el nombre del archivo
-    nombre_archivo = f"{datetime.datetime.now().strftime('%Y-%m-%d')}-{contenido['slug']}.html"
+    nombre_archivo = f"{datetime.date.today().strftime('%Y-%m-%d')}-{contenido['slug']}.html"
     ruta_archivo = POSTS_DIR / nombre_archivo
 
     # Guardar el nuevo archivo HTML
@@ -91,10 +92,7 @@ def actualizar_index():
     
     # Generar el HTML para el grid de artículos
     grid_html = ""
-    for i, post_path in enumerate(posts[:10]): # Limitar a los 10 más recientes
-        # Para extraer el título, etc., necesitaríamos parsear el HTML.
-        # Por simplicidad, usaremos el nombre del archivo como título temporal.
-        # Una versión más avanzada usaría BeautifulSoup para parsear el título real.
+    for post_path in posts[:10]: # Limitar a los 10 más recientes
         title_from_slug = post_path.stem[11:].replace("-", " ").title()
         
         card_html = f"""
@@ -136,10 +134,11 @@ def actualizar_index():
 
 # --- Ejecución Principal ---
 if __name__ == "__main__":
+    # Asegurarse de que los directorios base existan
+    TEMPLATES_DIR.mkdir(exist_ok=True)
+    
     contenido_nuevo = generar_contenido_ia()
     if contenido_nuevo:
         crear_archivo_post(contenido_nuevo)
         actualizar_index()
-
         print("\n🎉 ¡Proceso completado! Un nuevo post ha sido creado y la página de inicio está actualizada.")
-
