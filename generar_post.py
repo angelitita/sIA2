@@ -58,7 +58,7 @@ def generar_contenido_ia():
 
 def crear_archivo_post(contenido):
     """Crea un nuevo archivo HTML para el post a partir de una plantilla."""
-      POSTS_DIR.mkdir(exist_ok=True)
+POSTS_DIR.mkdir(exist_ok=True)
     
     # Cargar la plantilla del artículo
     with open(TEMPLATES_DIR / "template_article.html", "r", encoding="utf-8") as f:
@@ -142,3 +142,4 @@ if __name__ == "__main__":
         actualizar_index()
 
         print("\n🎉 ¡Proceso completado! Un nuevo post ha sido creado y la página de inicio está actualizada.")
+
