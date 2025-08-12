@@ -1,4 +1,4 @@
-print("--- EJECUTANDO SCRIPT v17.1: CORRECCIÓN DE TYPO ---")
+print("--- EJECUTANDO SCRIPT v17.2: CORRECCIÓN DE INDENTACIÓN FINAL ---")
 import os
 import datetime
 import json
@@ -54,12 +54,4 @@ def crear_archivo_post(contenido):
     POSTS_DIR.mkdir(exist_ok=True)
     fecha_actual = datetime.datetime.now().strftime("%d de %B de %Y")
     article_content = f"""<article class="article-body"><h1 class="article-title">{contenido['title']}</h1><p class="article-meta">Publicado por Redacción sIA el {fecha_actual} en <span class="category-tag">{contenido['category']}</span></p><div class="article-content">{contenido['content_html']}</div></article>"""
-    full_html = (HTML_HEADER.format(title=contenido['title'], css_path="../static/css/style.css", logo_path="../static/img/logo.png", index_path="../index.html") + article_content + HTML_FOOTER)
-    nombre_archivo = f"{datetime.date.today().strftime('%Y-%m-%d')}-{contenido['slug']}.html"
-    ruta_archivo = POSTS_DIR / nombre_archivo
-    with open(ruta_archivo, "w", encoding="utf-8") as f: f.write(full_html)
-    print(f"📄 Archivo de post creado en: {ruta_archivo}")
-
-def get_title_from_html(file_path):
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
+    full_html = (HTML_HEADER.
