@@ -1,4 +1,4 @@
-print("--- EJECUTANDO SCRIPT v14: VERSIÓN FINAL Y ROBUSTA ---")
+print("--- EJECUTANDO SCRIPT v15: AJUSTES FINALES ---")
 import os
 import datetime
 import json
@@ -9,7 +9,8 @@ import random
 from bs4 import BeautifulSoup
 
 # --- CONFIGURACIÓN ---
-# MODIFICA ESTA LISTA con los nombres de tus imágenes en static/img
+# ¡IMPORTANTE! MODIFICA ESTA LISTA con los nombres exactos de tus imágenes.
+# Asegúrate de que coincidan con los archivos que subiste a la carpeta `static/img`.
 LISTA_DE_IMAGENES = [
     "imagen-1.jpg",
     "imagen-2.jpg",
@@ -26,8 +27,9 @@ POSTS_DIR = Path("posts")
 ROOT_DIR = Path(".")
 
 # --- PLANTILLAS HTML ---
+# Corregido a logo.png
 HTML_HEADER = """<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{title}</title><link rel="stylesheet" href="{css_path}"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"></head><body><header><div class="logo"><img src="{logo_path}" alt="sIA Logo"><h1><a href="{index_path}">sIA</a></h1></div><nav><ul><li><a href="#">Noticias</a></li><li><a href="#">Análisis</a></li><li><a href="#">IA para Todos</a></li><li><a href="#">Herramientas IA</a></li><li><a href="#">Opinión</a></li></ul></nav><a href="https://docs.google.com/forms/d/e/1FAIpQLSeNl4keU0p1eDMvzUpM5p57Naf5qBMsl5MSJNBMxPnWbofshQ/viewform?usp=header" target="_blank" class="subscribe-button">Suscríbete</a></header>"""
-HTML_FOOTER = """<footer><p>&copy; 2025 sIA. Todos los derechos reservados.</p><p><a href="#">Política de Privacidad</a></p></footer></body></html>"""
+HTML_FOOTER = """<footer><p>&copy; 2025 sIA. Todos los derechos reservados.</p><p><a href="/privacy.html">Política de Privacidad</a></p></footer></body></html>"""
 
 # --- FUNCIONES ---
 
@@ -36,7 +38,7 @@ def generar_contenido_ia():
     system_prompt = "Eres un periodista de tecnología para el portal 'sIA', especializado en IA en Latinoamérica. Tu respuesta DEBE ser únicamente un objeto JSON válido."
     user_prompt = """
     Genera UN artículo de noticias sobre un tema de actualidad en IA relevante para Latinoamérica (una nueva startup, una inversión, un avance tecnológico, etc.).
-    El artículo debe tener entre 350 y 550 palabras. El HTML debe usar <p>, <h2> y <h3>. NO incluyas imágenes.
+    El artículo debe ser conciso, entre 350 y 550 palabras. El HTML debe usar <p>, <h2> y <h3>. NO incluyas imágenes.
     El slug debe ser único y relevante al título.
     Usa esta estructura JSON:
     {"title": "Un titular de noticia real y atractivo","summary": "Un resumen corto del artículo.","category": "Noticias","content_html": "El cuerpo del artículo en HTML.","slug": "un-slug-para-la-url-basado-en-el-titulo"}
@@ -48,7 +50,6 @@ def generar_contenido_ia():
         )
         response_content = chat_completion.choices[0].message.content
         contenido = json.loads(response_content)
-        # Asegurar slug único añadiendo la hora
         contenido['slug'] = f"{contenido['slug']}-{datetime.datetime.now().strftime('%H-%M-%S')}"
         print(f"✅ Contenido generado con éxito: '{contenido['title']}'")
         return contenido
@@ -89,6 +90,10 @@ def actualizar_index():
     posts = sorted(POSTS_DIR.glob("*.html"), key=os.path.getmtime, reverse=True)
     
     grid_html = ""
+    # Asegurarse de que la lista de imágenes no esté vacía para evitar errores
+    if not LISTA_DE_IMAGENES:
+        LISTA_DE_IMAGENES.append("placeholder.png") # Imagen de respaldo
+
     for post_path in posts[:9]:
         title = get_title_from_html(post_path)
         imagen_aleatoria = random.choice(LISTA_DE_IMAGENES)
@@ -99,7 +104,8 @@ def actualizar_index():
     hero_html = ""
     if posts:
         hero_title = get_title_from_html(posts[0])
-        hero_html = f"""<section class="hero-article"><h2><a href="{posts[0].as_posix()}">{hero_title}</a></h2><p>Este es el artículo más reciente generado por nuestra IA.</p></section>"""
+        # --- TEXTO CORREGIDO ---
+        hero_html = f"""<section class="hero-article"><h2><a href="{posts[0].as_posix()}">{hero_title}</a></h2><p>Este es el artículo más reciente publicado.</p></section>"""
 
     index_main_content = f"""<main>{hero_html}<div class="content-area"><div class="article-grid">{grid_html}</div><aside class="sidebar"><div class="widget"><h3>Lo Más Leído</h3></div><div class="widget"><h3>Herramientas IA Destacadas</h3></div></aside></div></main>"""
     
@@ -115,7 +121,6 @@ def actualizar_index():
 
 # --- Ejecución Principal ---
 if __name__ == "__main__":
-    # Necesitamos instalar BeautifulSoup para leer los títulos
     try:
         from bs4 import BeautifulSoup
     except ImportError:
