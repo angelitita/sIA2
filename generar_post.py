@@ -3,6 +3,7 @@ import google.generativeai as genai
 import datetime
 import json
 from pathlib import Path
+import sys
 
 # --- Configuración ---
 from dotenv import load_dotenv
@@ -117,16 +118,24 @@ def actualizar_index():
     with open(ROOT_DIR / "index.html", "w", encoding="utf-8") as f:
         f.write(index_template_str)
         
-    print("✅ index.html actualizado con los últimos posts.")
+    print(f"✅ index.html actualizado con los últimos posts. Tamaño: {os.path.getsize(ROOT_DIR / 'index.html') / 1024:.2f} KB")
 
 
 # --- Ejecución Principal ---
 if __name__ == "__main__":
-    if not TEMPLATES_DIR.exists():
-        print(f"❌ Error: La carpeta de plantillas '{TEMPLATES_DIR}' no se encuentra.")
-    else:
-        contenido_nuevo = generar_contenido_ia()
-        if contenido_nuevo:
-            crear_archivo_post(contenido_nuevo)
-            actualizar_index()
-            print("\n🎉 ¡Proceso completado! Un nuevo post ha sido creado y la página de inicio está actualizada.")
+    if not TEMPLATES_DIR.exists() or not (TEMPLATES_DIR / "template_article.html").exists() or not (TEMPLATES_DIR / "template_index.html").exists():
+        print(f"❌ Error Crítico: La carpeta '{TEMPLATES_DIR}' o uno de sus archivos de plantilla no existe. Abortando.")
+        sys.exit(1)
+
+    contenido_nuevo = generar_contenido_ia()
+    
+    if contenido_nuevo:
+        # ---- VERIFICACIÓN DE SEGURIDAD ----
+        # Si el contenido HTML tiene más de 15,000 caracteres, algo salió mal.
+        if len(contenido_nuevo.get("content_html", "")) > 15000:
+            print("❌ ERROR CRÍTICO: El contenido generado por la IA es demasiado largo (>15,000 caracteres). Abortando para evitar archivos gigantes.")
+            sys.exit(1) # Detiene el script con un código de error
+
+        crear_archivo_post(contenido_nuevo)
+        actualizar_index()
+        print("\n🎉 ¡Proceso completado! Un nuevo post ha sido creado y la página de inicio está actualizada.")
