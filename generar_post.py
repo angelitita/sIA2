@@ -5,16 +5,13 @@ import json
 from pathlib import Path
 
 # --- Configuración ---
-# Carga la API Key desde un archivo .env para seguridad
-# Para GitHub Actions, la clave se pasa como un "secret"
 from dotenv import load_dotenv
 load_dotenv()
 
-# Configuración de la API de Gemini
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-# Rutas de las carpetas (usando pathlib para compatibilidad)
+# Rutas de las carpetas
 POSTS_DIR = Path("posts")
 TEMPLATES_DIR = Path("templates")
 ROOT_DIR = Path(".")
@@ -43,12 +40,6 @@ def generar_contenido_ia():
       "content_html": "El cuerpo completo del artículo en HTML, respetando el límite de palabras.",
       "slug": "un-slug-para-la-url-corto-y-optimizado"
     }
-    
-    Algunos temas de ejemplo para tu inspiración (pero crea algo nuevo):
-    - El impacto de los nuevos modelos de lenguaje en las startups de Colombia.
-    - La startup argentina que utiliza IA para optimizar la agricultura.
-    - El debate sobre la regulación de la IA en Chile y México.
-    - Un tutorial sencillo explicando qué es la 'IA generativa' para dueños de PYMES.
     """
     
     try:
@@ -65,25 +56,20 @@ def generar_contenido_ia():
 def crear_archivo_post(contenido):
     """Crea un nuevo archivo HTML para el post a partir de una plantilla."""
     
-    # Asegurarse de que el directorio 'posts' exista antes de guardar.
     POSTS_DIR.mkdir(exist_ok=True)
 
-    # Cargar la plantilla del artículo
     with open(TEMPLATES_DIR / "template_article.html", "r", encoding="utf-8") as f:
         template_str = f.read()
 
-    # Reemplazar los placeholders con el contenido de la IA
     fecha_actual = datetime.datetime.now().strftime("%d de %B de %Y")
     template_str = template_str.replace("{{TITULO}}", contenido["title"])
     template_str = template_str.replace("{{FECHA}}", fecha_actual)
     template_str = template_str.replace("{{CATEGORIA}}", contenido["category"])
     template_str = template_str.replace("{{CONTENIDO_HTML}}", contenido["content_html"])
     
-    # Crear el nombre del archivo
     nombre_archivo = f"{datetime.date.today().strftime('%Y-%m-%d')}-{contenido['slug']}.html"
     ruta_archivo = POSTS_DIR / nombre_archivo
 
-    # Guardar el nuevo archivo HTML
     with open(ruta_archivo, "w", encoding="utf-8") as f:
         f.write(template_str)
     
@@ -94,12 +80,10 @@ def actualizar_index():
     
     print("🔄 Actualizando la página de inicio (index.html)...")
     
-    # Obtener la lista de todos los posts y ordenarlos por fecha (más nuevo primero)
     posts = sorted(POSTS_DIR.glob("*.html"), key=os.path.getmtime, reverse=True)
     
-    # Generar el HTML para el grid de artículos
     grid_html = ""
-    for post_path in posts[:10]: # Limitar a los 10 más recientes
+    for post_path in posts[:10]:
         title_from_slug = post_path.stem[11:].replace("-", " ").title()
         
         card_html = f"""
@@ -113,7 +97,6 @@ def actualizar_index():
         """
         grid_html += card_html
 
-    # Generar el HTML para el artículo Héroe (el más reciente)
     hero_html = ""
     if posts:
         hero_post_path = posts[0]
@@ -125,11 +108,9 @@ def actualizar_index():
         </section>
         """
 
-    # Cargar la plantilla del index
     with open(TEMPLATES_DIR / "template_index.html", "r", encoding="utf-8") as f:
         index_template_str = f.read()
 
-    # Reemplazar los placeholders y guardar el nuevo index.html
     index_template_str = index_template_str.replace("", hero_html)
     index_template_str = index_template_str.replace("", grid_html)
 
@@ -141,13 +122,11 @@ def actualizar_index():
 
 # --- Ejecución Principal ---
 if __name__ == "__main__":
-    # Asegurarse de que los directorios base existan
-    TEMPLATES_DIR.mkdir(exist_ok=True)
-    
-    contenido_nuevo = generar_contenido_ia()
-    if contenido_nuevo:
-        crear_archivo_post(contenido_nuevo)
-        actualizar_index()
-        print("\n🎉 ¡Proceso completado! Un nuevo post ha sido creado y la página de inicio está actualizada.")
-
-
+    if not TEMPLATES_DIR.exists():
+        print(f"❌ Error: La carpeta de plantillas '{TEMPLATES_DIR}' no se encuentra.")
+    else:
+        contenido_nuevo = generar_contenido_ia()
+        if contenido_nuevo:
+            crear_archivo_post(contenido_nuevo)
+            actualizar_index()
+            print("\n🎉 ¡Proceso completado! Un nuevo post ha sido creado y la página de inicio está actualizada.")
