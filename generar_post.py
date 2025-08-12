@@ -11,9 +11,17 @@ from bs4 import BeautifulSoup
 # --- CONFIGURACIÓN ---
 # ¡IMPORTANTE! MODIFICA ESTA LISTA con los nombres exactos de tus imágenes.
 LISTA_DE_IMAGENES = [
-    "imagen-1.jpg", "imagen-2.jpg", "imagen-3.jpg", "imagen-4.jpg",
-    "imagen-5.jpg", "imagen-6.jpg", "imagen-8.jpg", "imagen-9.jpg",
-    "imagen-10.jpg", "imagen-11.jpg"
+    "imagen-1.PNG",
+    "imagen-2.PNG",
+    "imagen-3.PNG",
+    "imagen-4.PNG",
+    "imagen-5.PNG",
+    "imagen-6.PNG",
+    "imagen-7.PNG",
+    "imagen-8.PNG",
+    "imagen-9.PNG",
+    "imagen-10.PNG",
+    "imagen-11.PNG"
 ]
 
 try:
@@ -126,3 +134,4 @@ if __name__ == "__main__":
         actualizar_index()
         crear_pagina_privacidad()
         print("\n🎉 ¡Proceso completado!")
+
