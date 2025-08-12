@@ -24,17 +24,24 @@ ROOT_DIR = Path(".")
 def generar_contenido_ia():
     """Genera el contenido de un nuevo artículo usando la API de Gemini."""
     
-    prompt = """
+  prompt = """
     Actúa como un periodista experto en tecnología e inteligencia artificial, con un enfoque en Latinoamérica.
-    Tu tarea es generar un artículo de noticias completo y original sobre un tema de actualidad en IA relevante para la región.
-    
-    Por favor, proporciona la respuesta exclusivamente en formato JSON con la siguiente estructura:
+    Tu tarea es generar un artículo de noticias completo, original y CONCISO sobre un tema de actualidad en IA relevante para la región.
+
+    REGLAS ESTRICTAS PARA TU RESPUESTA:
+    1.  El cuerpo del artículo DEBE tener entre 300 y 500 palabras. No más.
+    2.  El HTML generado debe ser simple. Usa únicamente etiquetas <p>, <h2>, <h3> y <ul>.
+    3.  NO incluyas imágenes, ni etiquetas <img>, ni código de imagen en base64.
+    4.  El 'slug' para la URL debe ser corto, en minúsculas y no tener más de 10 palabras.
+    5.  La respuesta debe ser exclusivamente en formato JSON válido, sin ningún texto adicional antes o después.
+
+    La estructura del JSON debe ser:
     {
-      "title": "Un titular atractivo y optimizado para SEO",
+      "title": "Un titular atractivo y optimizado para SEO (máximo 15 palabras)",
       "summary": "Un resumen corto de 1-2 frases para la tarjeta de la página de inicio.",
       "category": "Una de las siguientes categorías: 'Noticias', 'Análisis', 'IA para Todos', 'Opinión'",
-      "content_html": "El cuerpo completo del artículo en formato HTML. Usa párrafos <p>, subtítulos <h2> y <h3>, y listas <ul> o <ol> si es necesario. No incluyas etiquetas <html>, <head>, o <body>.",
-      "slug": "un-slug-para-la-url-sin-espacios-y-en-minusculas"
+      "content_html": "El cuerpo completo del artículo en HTML, respetando el límite de palabras.",
+      "slug": "un-slug-para-la-url-corto-y-optimizado"
     }
     
     Algunos temas de ejemplo para tu inspiración (pero crea algo nuevo):
@@ -142,3 +149,4 @@ if __name__ == "__main__":
         crear_archivo_post(contenido_nuevo)
         actualizar_index()
         print("\n🎉 ¡Proceso completado! Un nuevo post ha sido creado y la página de inicio está actualizada.")
+
