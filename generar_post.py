@@ -1,4 +1,4 @@
-print("--- EJECUTANDO SCRIPT v13: VERSIÓN FINAL ---")
+print("--- EJECUTANDO SCRIPT v14: VERSIÓN FINAL Y ROBUSTA ---")
 import os
 import datetime
 import json
@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 from groq import Groq
 import random
+from bs4 import BeautifulSoup
 
 # --- CONFIGURACIÓN ---
 # MODIFICA ESTA LISTA con los nombres de tus imágenes en static/img
@@ -31,23 +32,15 @@ HTML_FOOTER = """<footer><p>&copy; 2025 sIA. Todos los derechos reservados.</p><
 # --- FUNCIONES ---
 
 def generar_contenido_ia():
-    """Genera el contenido para un artículo usando Groq."""
     print("🤖 Actuando como periodista y generando nuevo contenido...")
-    
-    system_prompt = "Eres un periodista de tecnología para el portal de noticias 'sIA', especializado en el impacto de la Inteligencia Artificial en Latinoamérica. Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido, sin texto adicional."
+    system_prompt = "Eres un periodista de tecnología para el portal 'sIA', especializado en IA en Latinoamérica. Tu respuesta DEBE ser únicamente un objeto JSON válido."
     user_prompt = """
-    Por favor, genera UN SOLO artículo de noticias sobre un tema de actualidad en IA relevante para Latinoamérica (ej. una nueva startup, una inversión importante, un avance tecnológico local, etc.).
-    El artículo debe ser conciso, entre 350 y 550 palabras. El HTML debe ser simple, usando solo <p>, <h2> y <h3>.
-    La estructura JSON debe ser:
-    {
-      "title": "Un titular de noticia real y atractivo",
-      "summary": "Un resumen corto de 1-2 frases del artículo.",
-      "category": "Noticias",
-      "content_html": "El cuerpo completo del artículo en HTML.",
-      "slug": "un-slug-para-la-url-basado-en-el-titulo"
-    }
+    Genera UN artículo de noticias sobre un tema de actualidad en IA relevante para Latinoamérica (una nueva startup, una inversión, un avance tecnológico, etc.).
+    El artículo debe tener entre 350 y 550 palabras. El HTML debe usar <p>, <h2> y <h3>. NO incluyas imágenes.
+    El slug debe ser único y relevante al título.
+    Usa esta estructura JSON:
+    {"title": "Un titular de noticia real y atractivo","summary": "Un resumen corto del artículo.","category": "Noticias","content_html": "El cuerpo del artículo en HTML.","slug": "un-slug-para-la-url-basado-en-el-titulo"}
     """
-    
     try:
         chat_completion = client.chat.completions.create(
             messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
@@ -55,6 +48,8 @@ def generar_contenido_ia():
         )
         response_content = chat_completion.choices[0].message.content
         contenido = json.loads(response_content)
+        # Asegurar slug único añadiendo la hora
+        contenido['slug'] = f"{contenido['slug']}-{datetime.datetime.now().strftime('%H-%M-%S')}"
         print(f"✅ Contenido generado con éxito: '{contenido['title']}'")
         return contenido
     except Exception as e:
@@ -67,7 +62,7 @@ def crear_archivo_post(contenido):
     article_content = f"""<article class="article-body"><h1 class="article-title">{contenido['title']}</h1><p class="article-meta">Publicado por Redacción sIA el {fecha_actual} en <span class="category-tag">{contenido['category']}</span></p><div class="article-content">{contenido['content_html']}</div></article>"""
     
     full_html = (
-        HTML_HEADER.format(title=contenido['title'], css_path="../static/css/style.css", logo_path="../static/img/logo.jpg", index_path="../index.html") +
+        HTML_HEADER.format(title=contenido['title'], css_path="../static/css/style.css", logo_path="../static/img/logo.png", index_path="../index.html") +
         article_content +
         HTML_FOOTER
     )
@@ -79,37 +74,37 @@ def crear_archivo_post(contenido):
         f.write(full_html)
     print(f"📄 Archivo de post creado en: {ruta_archivo}")
 
+def get_title_from_html(file_path):
+    """Extrae el título H1 de un archivo HTML."""
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            soup = BeautifulSoup(f, "html.parser")
+            title_tag = soup.find("h1", class_="article-title")
+            return title_tag.string if title_tag else "Título no encontrado"
+    except Exception:
+        return file_path.stem[11:].replace("-", " ").title()
+
 def actualizar_index():
     print("🔄 Actualizando la página de inicio (index.html)...")
     posts = sorted(POSTS_DIR.glob("*.html"), key=os.path.getmtime, reverse=True)
     
     grid_html = ""
-    for post_path in posts[:9]: # Cambiado a 9 para dejar espacio al nuevo
-        try:
-            with open(post_path, "r", encoding="utf-8") as f:
-                # Extraer el título del HTML es complejo, usaremos el slug por ahora
-                title_from_slug = post_path.stem[11:].replace("-", " ").title()
-                imagen_aleatoria = random.choice(LISTA_DE_IMAGENES)
-                ruta_imagen = f"static/img/{imagen_aleatoria}"
-                card_html = f"""<article class="article-card"><a href="{post_path.as_posix()}"><img src="{ruta_imagen}" alt="Imagen del artículo"></a><div class="card-content"><span class="category-tag">Noticias</span><h3><a href="{post_path.as_posix()}">{title_from_slug}</a></h3></div></article>"""
-                grid_html += card_html
-        except Exception as e:
-            print(f"No se pudo procesar el post {post_path}: {e}")
-
+    for post_path in posts[:9]:
+        title = get_title_from_html(post_path)
+        imagen_aleatoria = random.choice(LISTA_DE_IMAGENES)
+        ruta_imagen = f"static/img/{imagen_aleatoria}"
+        card_html = f"""<article class="article-card"><a href="{post_path.as_posix()}"><img src="{ruta_imagen}" alt="Imagen del artículo"></a><div class="card-content"><span class="category-tag">Noticias</span><h3><a href="{post_path.as_posix()}">{title}</a></h3></div></article>"""
+        grid_html += card_html
 
     hero_html = ""
     if posts:
-        try:
-            with open(posts[0], "r", encoding="utf-8") as f:
-                hero_title = posts[0].stem[11:].replace("-", " ").title()
-                hero_html = f"""<section class="hero-article"><h2><a href="{posts[0].as_posix()}">{hero_title}</a></h2><p>Este es el artículo más reciente generado por nuestra IA.</p></section>"""
-        except Exception as e:
-            print(f"No se pudo procesar el post héroe {posts[0]}: {e}")
+        hero_title = get_title_from_html(posts[0])
+        hero_html = f"""<section class="hero-article"><h2><a href="{posts[0].as_posix()}">{hero_title}</a></h2><p>Este es el artículo más reciente generado por nuestra IA.</p></section>"""
 
     index_main_content = f"""<main>{hero_html}<div class="content-area"><div class="article-grid">{grid_html}</div><aside class="sidebar"><div class="widget"><h3>Lo Más Leído</h3></div><div class="widget"><h3>Herramientas IA Destacadas</h3></div></aside></div></main>"""
     
     full_html = (
-        HTML_HEADER.format(title="sIA - Inteligencia Artificial en Latinoamérica", css_path="static/css/style.css", logo_path="static/img/logo.jpg", index_path="index.html") +
+        HTML_HEADER.format(title="sIA - Inteligencia Artificial en Latinoamérica", css_path="static/css/style.css", logo_path="static/img/logo.png", index_path="index.html") +
         index_main_content +
         HTML_FOOTER
     )
@@ -120,6 +115,14 @@ def actualizar_index():
 
 # --- Ejecución Principal ---
 if __name__ == "__main__":
+    # Necesitamos instalar BeautifulSoup para leer los títulos
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:
+        print("Instalando BeautifulSoup...")
+        os.system(f"{sys.executable} -m pip install beautifulsoup4")
+        from bs4 import BeautifulSoup
+
     contenido_nuevo = generar_contenido_ia()
     if contenido_nuevo:
         crear_archivo_post(contenido_nuevo)
