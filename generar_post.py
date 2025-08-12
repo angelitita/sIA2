@@ -1,4 +1,4 @@
-print("--- EJECUTANDO SCRIPT v4 'EL PERIODISTA' ---")
+print("--- EJECUTANDO SCRIPT v5 CON STOP FORZADO ---")
 import os
 import google.generativeai as genai
 import datetime
@@ -11,7 +11,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel('gemini-1.5-flash')
+
+# --- CONFIGURACIÓN DE GENERACIÓN ESTRICTA ---
+# 1024 tokens es aproximadamente 750 palabras. Un límite seguro.
+generation_config = genai.types.GenerationConfig(max_output_tokens=1024)
+
+# Aplicamos la configuración estricta al modelo
+model = genai.GenerativeModel(
+    'gemini-1.5-flash',
+    generation_config=generation_config
+)
 
 # Rutas de las carpetas
 POSTS_DIR = Path("posts")
@@ -23,31 +32,28 @@ ROOT_DIR = Path(".")
 def generar_contenido_ia():
     """Genera el contenido de un nuevo artículo usando la API de Gemini."""
     
-    # --- NUEVO PROMPT INTELIGENTE ---
     prompt = """
     Actúa como un periodista de tecnología para el portal de noticias 'sIA', especializado en el impacto de la Inteligencia Artificial en Latinoamérica.
-    Tu tarea es generar UN SOLO artículo de noticias. Para ello, utiliza tu conocimiento sobre eventos recientes, tendencias (como las de Google Trends) y anuncios de empresas tecnológicas en la región para encontrar un tema de actualidad.
-    El artículo debe ser una noticia concisa, relevante y actual. No debe ser una página web completa, sino el contenido de un post individual para nuestro sitio.
+    Tu tarea es generar UN SOLO artículo de noticias conciso y relevante sobre un tema de actualidad.
 
     REGLAS ESTRICTAS PARA TU RESPUESTA:
-    1.  El cuerpo del artículo DEBE tener entre 350 y 550 palabras.
-    2.  El HTML generado debe ser simple. Usa únicamente etiquetas <p>, <h2>, y <h3>.
-    3.  NO incluyas imágenes ni etiquetas <img>.
-    4.  El 'slug' para la URL debe ser corto, en minúsculas y relevante al título.
-    5.  Tu respuesta final debe ser EXCLUSIVAMENTE un objeto JSON válido, sin texto adicional.
+    1.  El artículo debe ser informativo y tener una longitud razonable para una noticia web.
+    2.  El HTML generado debe ser simple: solo <p>, <h2>, y <h3>.
+    3.  NO incluyas imágenes.
+    4.  Tu respuesta final debe ser EXCLUSIVAMENTE un objeto JSON válido.
 
     La estructura del JSON debe ser:
     {
       "title": "Un titular de noticia atractivo y actual",
       "summary": "Un resumen corto de 1-2 frases del artículo.",
-      "category": "Una de las siguientes: 'Noticias', 'Análisis', 'IA para Todos'",
-      "content_html": "El cuerpo completo del artículo en HTML, respetando el límite de palabras.",
+      "category": "Noticias",
+      "content_html": "El cuerpo completo del artículo en HTML.",
       "slug": "un-slug-para-la-url-basado-en-el-titulo"
     }
     """
     
     try:
-        print("🤖 Actuando como periodista y generando nuevo contenido...")
+        print("🤖 Generando nuevo contenido con la API de Gemini...")
         response = model.generate_content(prompt)
         json_response = response.text.strip().replace("```json", "").replace("```", "")
         contenido = json.loads(json_response)
@@ -133,11 +139,6 @@ if __name__ == "__main__":
     contenido_nuevo = generar_contenido_ia()
     
     if contenido_nuevo:
-        # ---- VERIFICACIÓN DE SEGURIDAD ----
-        if len(contenido_nuevo.get("content_html", "")) > 15000:
-            print(f"❌ ERROR CRÍTICO: El contenido generado es demasiado largo ({len(contenido_nuevo.get('content_html', ''))} caracteres). Abortando.")
-            sys.exit(1)
-
         crear_archivo_post(contenido_nuevo)
         actualizar_index()
         print("\n🎉 ¡Proceso completado! Un nuevo post ha sido creado y la página de inicio está actualizada.")
