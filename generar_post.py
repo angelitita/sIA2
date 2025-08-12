@@ -24,7 +24,7 @@ ROOT_DIR = Path(".")
 def generar_contenido_ia():
     """Genera el contenido de un nuevo artículo usando la API de Gemini."""
     
-  prompt = """
+    prompt = """
     Actúa como un periodista experto en tecnología e inteligencia artificial, con un enfoque en Latinoamérica.
     Tu tarea es generar un artículo de noticias completo, original y CONCISO sobre un tema de actualidad en IA relevante para la región.
 
@@ -149,4 +149,5 @@ if __name__ == "__main__":
         crear_archivo_post(contenido_nuevo)
         actualizar_index()
         print("\n🎉 ¡Proceso completado! Un nuevo post ha sido creado y la página de inicio está actualizada.")
+
 
