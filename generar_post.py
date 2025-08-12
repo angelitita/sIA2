@@ -33,7 +33,7 @@ HTML_HEADER = """<!DOCTYPE html>
     <header>
         <div class="logo">
             <img src="{logo_path}" alt="sIA Logo">
-            <h1><a href="{index_path}">sIA</a></h1>
+            <h1><a href="static/img/logo.jpg">sIA</a></h1>
         </div>
         <nav>
             <ul>
@@ -164,3 +164,4 @@ if __name__ == "__main__":
         crear_archivo_post(contenido_nuevo)
         actualizar_index()
         print("\n🎉 ¡Proceso completado!")
+
