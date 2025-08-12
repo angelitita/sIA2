@@ -1,3 +1,4 @@
+print("--- EJECUTANDO VERSIÓN MÁS RECIENTE DEL SCRIPT (CON LÍMITES) ---")
 import os
 import google.generativeai as genai
 import datetime
@@ -21,7 +22,7 @@ ROOT_DIR = Path(".")
 
 def generar_contenido_ia():
     """Genera el contenido de un nuevo artículo usando la API de Gemini."""
-    
+
     prompt = """
     Actúa como un periodista experto en tecnología e inteligencia artificial, con un enfoque en Latinoamérica.
     Tu tarea es generar un artículo de noticias completo, original y CONCISO sobre un tema de actualidad en IA relevante para la región.
@@ -42,7 +43,7 @@ def generar_contenido_ia():
       "slug": "un-slug-para-la-url-corto-y-optimizado"
     }
     """
-    
+
     try:
         print("🤖 Generando nuevo contenido con la API de Gemini...")
         response = model.generate_content(prompt)
@@ -56,7 +57,7 @@ def generar_contenido_ia():
 
 def crear_archivo_post(contenido):
     """Crea un nuevo archivo HTML para el post a partir de una plantilla."""
-    
+
     POSTS_DIR.mkdir(exist_ok=True)
 
     with open(TEMPLATES_DIR / "template_article.html", "r", encoding="utf-8") as f:
@@ -67,26 +68,26 @@ def crear_archivo_post(contenido):
     template_str = template_str.replace("{{FECHA}}", fecha_actual)
     template_str = template_str.replace("{{CATEGORIA}}", contenido["category"])
     template_str = template_str.replace("{{CONTENIDO_HTML}}", contenido["content_html"])
-    
+
     nombre_archivo = f"{datetime.date.today().strftime('%Y-%m-%d')}-{contenido['slug']}.html"
     ruta_archivo = POSTS_DIR / nombre_archivo
 
     with open(ruta_archivo, "w", encoding="utf-8") as f:
         f.write(template_str)
-    
+
     print(f"📄 Archivo de post creado en: {ruta_archivo}")
 
 def actualizar_index():
     """Actualiza la página index.html con los últimos posts."""
-    
+
     print("🔄 Actualizando la página de inicio (index.html)...")
-    
+
     posts = sorted(POSTS_DIR.glob("*.html"), key=os.path.getmtime, reverse=True)
-    
+
     grid_html = ""
     for post_path in posts[:10]:
         title_from_slug = post_path.stem[11:].replace("-", " ").title()
-        
+
         card_html = f"""
         <article class="article-card">
             <a href="{post_path.as_posix()}"><img src="https://via.placeholder.com/300x180.png?text=sIA" alt="Imagen del artículo"></a>
@@ -117,7 +118,7 @@ def actualizar_index():
 
     with open(ROOT_DIR / "index.html", "w", encoding="utf-8") as f:
         f.write(index_template_str)
-        
+
     print(f"✅ index.html actualizado con los últimos posts. Tamaño: {os.path.getsize(ROOT_DIR / 'index.html') / 1024:.2f} KB")
 
 
@@ -128,13 +129,12 @@ if __name__ == "__main__":
         sys.exit(1)
 
     contenido_nuevo = generar_contenido_ia()
-    
+
     if contenido_nuevo:
         # ---- VERIFICACIÓN DE SEGURIDAD ----
-        # Si el contenido HTML tiene más de 15,000 caracteres, algo salió mal.
         if len(contenido_nuevo.get("content_html", "")) > 15000:
             print("❌ ERROR CRÍTICO: El contenido generado por la IA es demasiado largo (>15,000 caracteres). Abortando para evitar archivos gigantes.")
-            sys.exit(1) # Detiene el script con un código de error
+            sys.exit(1)
 
         crear_archivo_post(contenido_nuevo)
         actualizar_index()
