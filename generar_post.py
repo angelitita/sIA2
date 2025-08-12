@@ -27,18 +27,12 @@ ROOT_DIR = Path(".")
 def generar_contenido_ia():
     """Pide a la IA que genere ÚNICAMENTE el texto para un artículo."""
     
-    # Prompt ultra-simple que solo pide el texto del artículo.
     prompt = "Escribe un artículo de 3 párrafos sobre una noticia de actualidad de Inteligencia Artificial en Latinoamérica."
     
     try:
         print("🤖 Pidiendo solo el texto del artículo a la API de Groq...")
         chat_completion = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
+            messages=[{"role": "user", "content": prompt}],
             model="llama3-8b-8192",
             max_tokens=1024,
         )
@@ -46,11 +40,15 @@ def generar_contenido_ia():
         response_text = chat_completion.choices[0].message.content
         
         # El script ahora crea la estructura, no la IA
+        # Primero preparamos el texto HTML
+        texto_html = response_text.replace('\n', '</p><p>')
+        
+        # Luego creamos el diccionario de contenido
         contenido = {
           "title": "Un Nuevo Avance en la IA de Latinoamérica",
           "summary": "Descubre las últimas innovaciones y cómo están cambiando la región.",
           "category": "Noticias",
-          "content_html": f"<p>{response_text.replace('\n', '</p><p>')}</p>",
+          "content_html": f"<p>{texto_html}</p>",
           "slug": "nuevo-avance-ia-latam"
         }
 
@@ -120,3 +118,4 @@ if __name__ == "__main__":
         crear_archivo_post(contenido_nuevo)
         actualizar_index()
         print("\n🎉 ¡Proceso completado!")
+
