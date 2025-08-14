@@ -300,38 +300,31 @@ footer a {
 
 /* --- ESTILOS PARA MENÚ DE HAMBURGUESA --- */
 
-/* Botón de Hamburguesa */
+/* Reemplaza la regla .hamburger-menu anterior por esta: */
 .hamburger-menu {
-    display: none; /* Oculto en escritorio */
+    display: none; /* Oculto en escritorio por defecto */
+    position: fixed; /* Lo fija en la pantalla */
+    top: 1rem;       /* Lo alinea con la parte superior del header */
+    right: 2rem;      /* Lo alinea con la parte derecha del header */
+    width: 45px;
+    height: 45px;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 10px;
-    z-index: 1010;
+    z-index: 1010; /* La capa más alta, para que esté por encima del menú */
 }
+
+/* El resto del código que te di sigue igual, no necesitas cambiarlo */
 
 .hamburger-menu span {
     display: block;
     width: 25px;
     height: 3px;
     background-color: var(--dark-teal);
-    margin: 5px 0;
+    margin: 5px auto; /* Centra las líneas dentro del botón */
     transition: all 0.3s ease-in-out;
 }
-
-/* Animación del botón a una 'X' cuando está activo */
-.hamburger-menu.is-active span:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
-}
-.hamburger-menu.is-active span:nth-child(2) {
-    opacity: 0;
-}
-.hamburger-menu.is-active span:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
-}
-
-
-/* Contenedor del menú móvil */
+/* ... etc ... */
 .mobile-nav {
     display: none; /* Oculto por defecto */
     position: fixed;
@@ -388,3 +381,4 @@ footer a {
         display: flex;
     }
 }
+
