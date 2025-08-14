@@ -4,7 +4,7 @@
     --fuchsia: #C2185B;
     --pink-accent: #FF4081;
     --turquoise: #009688;
-    --light-pink-bg: #F8F9FA; /* Un gris claro para el fondo */
+    --light-pink-bg: #F8F9FA;
     --white: #FFFFFF;
     --text-color: #333;
     --border-color: #E0E0E0;
@@ -228,6 +228,27 @@ main {
     margin-bottom: 1rem;
 }
 
+/* --- Sección de Artículos Relacionados --- */
+.related-articles {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.related-articles h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: var(--dark-teal);
+}
+
+/* Reutilizamos el grid de la página principal pero forzamos 3 columnas en escritorio */
+.related-articles .article-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+
 /* --- Footer --- */
 footer {
     text-align: center;
@@ -256,5 +277,23 @@ footer a {
         gap: 1rem;
         flex-wrap: wrap;
         justify-content: center;
+    }
+
+    /* Títulos más pequeños en móviles */
+    .hero-article h2 a {
+        font-size: 1.8rem;
+        line-height: 1.2;
+    }
+    .article-card h3 a {
+        font-size: 1.1rem;
+    }
+    .article-title {
+        font-size: 2rem;
+        line-height: 1.2;
+    }
+
+    /* Grid de artículos relacionados en una sola columna en móvil */
+    .related-articles .article-grid {
+        grid-template-columns: 1fr;
     }
 }
