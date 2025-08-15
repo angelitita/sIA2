@@ -1,4 +1,4 @@
-# --- EJECUTANDO SCRIPT v12.0: PROMPTS ESPECÍFICOS Y DISEÑO ROBUSTO ---
+# --- EJECUTANDO SCRIPT v13.0: COMENTARIOS Y ENLACES ---
 import os
 import datetime
 import json
@@ -8,7 +8,11 @@ import random
 from groq import Groq
 from bs4 import BeautifulSoup
 
-print("--- INICIANDO SCRIPT DE GENERACIÓN DE CONTENIDO v12.0 ---")
+print("--- INICIANDO SCRIPT DE GENERACIÓN DE CONTENIDO v13.0 ---")
+
+# --- ID DE CUSDIS PARA COMENTARIOS ---
+# ¡IMPORTANTE! Pega aquí tu data-app-id de Cusdis
+CUSDIS_APP_ID = "f6cbff1c-928c-4ac4-b85a-c76024284179" 
 
 # --- CONFIGURACIÓN DE CLIENTES DE IA ---
 try:
@@ -37,7 +41,7 @@ except Exception as e:
 POSTS_DIR = Path("posts")
 ROOT_DIR = Path(".")
 
-# --- LISTAS DE TEMAS (AHORA MÁS ESPECÍFICOS) ---
+# --- LISTAS DE TEMAS (ESPECÍFICOS PARA EVITAR REPETICIÓN) ---
 temas_noticias = ["una startup innovadora de IA en un país de LATAM", "una inversión importante en una empresa de tecnología en la región", "un nuevo avance tecnológico sobre IA desarrollado en una universidad local"]
 temas_opinion = [
     "una columna de opinión sobre el Rabbit R1. ¿Es una revolución o un fracaso? Menciona sus promesas y la recepción real del público.",
@@ -45,8 +49,9 @@ temas_opinion = [
     "una opinión sobre Suno AI para la creación de música. ¿Puede realmente reemplazar a los músicos o es solo una herramienta divertida?",
     "una reseña del Humane AI Pin, explicando por qué ha sido tan controversial y si tiene futuro."
 ]
-temas_recursos = ["una lista curada de 'Las 5 mejores herramientas de IA para generar imágenes a partir de texto'", "un tutorial para principiantes sobre cómo usar una herramienta de IA popular como Eleven Labs", "una lista de 'Los 3 mejores cursos gratuitos para aprender sobre IA'"]
+temas_recursos = ["una lista curada de 'Las 5 mejores herramientas de IA para generar imágenes a partir de texto', con una breve descripción y un enlace placeholder para cada una.", "un tutorial para principiantes sobre cómo usar una herramienta de IA popular como Eleven Labs, con un enlace placeholder.", "una lista de 'Los 3 mejores cursos gratuitos para aprender sobre IA', con un enlace placeholder."]
 temas_herramientas = ["una reseña detallada de un producto tecnológico popular (como un smart speaker o un dron con IA). Incluye pros y contras y al final añade el marcador '[AQUÍ VA TU ENLACE DE AFILIADO]'."]
+
 
 # --- PLANTILLAS HTML ---
 HTML_HEADER = """<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{title}</title><link rel="stylesheet" href="/static/css/style.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"></head><body>
@@ -72,7 +77,7 @@ HTML_FOOTER = """<footer><p>&copy; 2025 sIA. Todos los derechos reservados.</p><
 PRIVACY_POLICY_CONTENT = """<main class="article-body" style="margin-top: 2rem;"><h1 class="article-title">Política de Privacidad</h1><div class="article-content"><p>Texto de la política de privacidad...</p></div></main>"""
 
 def generar_contenido_base(client, system_prompt, categoria, tema):
-    user_prompt = f"""Genera un artículo para la categoría '{categoria}' sobre: '{tema}'. Reglas estrictas: 1. El artículo DEBE estar escrito íntegramente en español de Latinoamérica. 2. La respuesta debe ser únicamente un objeto JSON válido, sin texto antes o después. Formato: {{"title": "...", "summary": "...", "content_html": "..."}}"""
+    user_prompt = f"""Genera un artículo para la categoría '{categoria}' sobre: '{tema}'. Reglas estrictas: 1. El artículo DEBE estar escrito íntegramente en español de Latinoamérica. 2. La respuesta debe ser únicamente un objeto JSON válido, sin texto antes o después. 3. Para la categoría 'IA para Todos', formatea cada item de la lista como un elemento `<li>` que contiene un enlace `<a>` con el nombre de la herramienta y una descripción `<p>`. Para el `href` del enlace, usa un placeholder `#`. Ejemplo: `<li><a href='#'>Nombre Herramienta</a><p>Descripción.</p></li>`. Formato JSON: {{"title": "...", "summary": "...", "content_html": "..."}}"""
     try:
         chat_completion = client.chat.completions.create(messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}], model="llama3-8b-8192", max_tokens=2048, response_format={"type": "json_object"})
         contenido = json.loads(chat_completion.choices[0].message.content)
@@ -112,7 +117,13 @@ def crear_archivo_post(contenido, todos_los_posts):
                 cards_html += f"""<article class="article-card"><a href="/{post_path.as_posix()}"><img src="/static/img/{imagen_aleatoria}" alt="Artículo"></a><div class="card-content"><span class="category-tag {category.replace(' ', '-')}">{category}</span><h3><a href="/{post_path.as_posix()}">{title}</a></h3></div></article>"""
         if cards_html:
             related_posts_html = f"""<section class="related-articles"><h2>Artículos que podrían interesarte</h2><div class="article-grid">{cards_html}</div></section>"""
-    article_content = f"""<div class="main-container"><main class="article-body"><article><h1 class="article-title">{contenido['title']}</h1><p class="article-meta">Publicado por Redacción sIA el {fecha_actual} en <span class="category-tag {contenido['category'].replace(' ', '-')}">{contenido['category']}</span></p><div class="article-content">{contenido['content_html']}</div></article>{related_posts_html}</main></div>"""
+    comments_section_html = f"""
+    <section class="comments-section">
+        <h2>Comentarios</h2>
+        <div id="cusdis_thread" data-host="https://cusdis.com" data-app-id="{CUSDIS_APP_ID}" data-page-id="{nombre_archivo}" data-page-url="/posts/{nombre_archivo}" data-page-title="{contenido['title']}"></div>
+        <script async defer src="https://cusdis.com/js/cusdis.es.js"></script>
+    </section>"""
+    article_content = f"""<div class="main-container"><main class="article-body"><article><h1 class="article-title">{contenido['title']}</h1><p class="article-meta">Publicado por Redacción sIA el {fecha_actual} en <span class="category-tag {contenido['category'].replace(' ', '-')}">{contenido['category']}</span></p><div class="article-content">{contenido['content_html']}</div></article>{comments_section_html}{related_posts_html}</main></div>"""
     full_html = HTML_HEADER.format(title=contenido['title']) + article_content + HTML_FOOTER
     with open(POSTS_DIR / nombre_archivo, "w", encoding="utf-8") as f: f.write(full_html)
     print(f"📄 Archivo de post creado: {nombre_archivo}")
