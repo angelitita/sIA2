@@ -34,8 +34,8 @@ header {
 .logo { display: flex; align-items: center; }
 .logo img { height: 50px; margin-right: 15px; }
 .logo h1 a { color: var(--dark-teal); text-decoration: none; font-size: 1.8rem; }
-.desktop-nav { display: none; } /* Oculto por defecto */
-@media (min-width: 993px) { .desktop-nav { display: block; } } /* Visible en pantallas grandes */
+.desktop-nav { display: none; } 
+@media (min-width: 993px) { .desktop-nav { display: block; } }
 .desktop-nav ul { list-style: none; display: flex; gap: 2rem; }
 .desktop-nav a { font-weight: 500; color: var(--dark-teal); }
 .subscribe-button { background-color: var(--fuchsia); color: var(--white) !important; padding: 0.7rem 1.5rem; border-radius: 25px; font-weight: 700; text-decoration: none; }
@@ -59,8 +59,10 @@ header {
 .article-meta { color: #555; margin-bottom: 2rem; }
 .article-content p { margin-bottom: 1rem; }
 .article-content h2, .article-content h3 { margin-top: 2rem; margin-bottom: 1rem; }
-.related-articles { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-color); }
-.related-articles h2 { font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center; }
+.article-content ul, .article-content ol { padding-left: 2rem; margin-bottom: 1rem; }
+.article-content li { margin-bottom: 0.5rem; }
+.related-articles, .comments-section { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-color); }
+.related-articles h2, .comments-section h2 { font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center; }
 
 /* --- ETIQUETAS DE CATEGORÍA --- */
 .category-tag { color: var(--white); padding: 0.3rem 0.6rem; border-radius: 5px; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem; display: inline-block; }
