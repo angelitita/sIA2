@@ -1,4 +1,4 @@
-# --- EJECUTANDO SCRIPT v11.1: CORRECCIÓN DE HOMEPAGE ---
+# --- EJECUTANDO SCRIPT v12.0: PROMPTS ESPECÍFICOS Y DISEÑO ROBUSTO ---
 import os
 import datetime
 import json
@@ -8,7 +8,7 @@ import random
 from groq import Groq
 from bs4 import BeautifulSoup
 
-print("--- INICIANDO SCRIPT DE GENERACIÓN DE CONTENIDO v11.1 ---")
+print("--- INICIANDO SCRIPT DE GENERACIÓN DE CONTENIDO v12.0 ---")
 
 # --- CONFIGURACIÓN DE CLIENTES DE IA ---
 try:
@@ -37,11 +37,16 @@ except Exception as e:
 POSTS_DIR = Path("posts")
 ROOT_DIR = Path(".")
 
-# --- LISTAS DE TEMAS ---
+# --- LISTAS DE TEMAS (AHORA MÁS ESPECÍFICOS) ---
 temas_noticias = ["una startup innovadora de IA en un país de LATAM", "una inversión importante en una empresa de tecnología en la región", "un nuevo avance tecnológico sobre IA desarrollado en una universidad local"]
-temas_opinion = ["el último gadget de IA y si realmente vale la pena", "un reto viral de IA en redes sociales y sus implicaciones", "una nueva app de IA que está cambiando la forma en que trabajamos", "el futuro de los asistentes de voz en los hogares de Latinoamérica"]
-temas_recursos = ["una lista curada de 'Las 5 mejores herramientas de IA para generar imágenes a partir de texto'", "un tutorial paso a paso para principiantes sobre cómo usar una herramienta de IA popular (como Eleven Labs para voz)", "una lista de 'Los 3 mejores cursos gratuitos para aprender sobre IA en 2025'"]
-temas_herramientas = ["una reseña detallada de un producto tecnológico popular (como un smart speaker, un dron con IA, o un software de productividad). Incluye pros y contras. Al final del texto, añade el marcador de texto '[AQUÍ VA TU ENLACE DE AFILIADO]'."]
+temas_opinion = [
+    "una columna de opinión sobre el Rabbit R1. ¿Es una revolución o un fracaso? Menciona sus promesas y la recepción real del público.",
+    "un análisis crítico de las gafas Ray-Ban Meta. ¿Son realmente útiles en el día a día o solo un juguete caro? Compara sus funciones con las expectativas.",
+    "una opinión sobre Suno AI para la creación de música. ¿Puede realmente reemplazar a los músicos o es solo una herramienta divertida?",
+    "una reseña del Humane AI Pin, explicando por qué ha sido tan controversial y si tiene futuro."
+]
+temas_recursos = ["una lista curada de 'Las 5 mejores herramientas de IA para generar imágenes a partir de texto'", "un tutorial para principiantes sobre cómo usar una herramienta de IA popular como Eleven Labs", "una lista de 'Los 3 mejores cursos gratuitos para aprender sobre IA'"]
+temas_herramientas = ["una reseña detallada de un producto tecnológico popular (como un smart speaker o un dron con IA). Incluye pros y contras y al final añade el marcador '[AQUÍ VA TU ENLACE DE AFILIADO]'."]
 
 # --- PLANTILLAS HTML ---
 HTML_HEADER = """<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{title}</title><link rel="stylesheet" href="/static/css/style.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"></head><body>
@@ -65,7 +70,6 @@ HTML_FOOTER = """<footer><p>&copy; 2025 sIA. Todos los derechos reservados.</p><
 </script>
 </body></html>"""
 PRIVACY_POLICY_CONTENT = """<main class="article-body" style="margin-top: 2rem;"><h1 class="article-title">Política de Privacidad</h1><div class="article-content"><p>Texto de la política de privacidad...</p></div></main>"""
-
 
 def generar_contenido_base(client, system_prompt, categoria, tema):
     user_prompt = f"""Genera un artículo para la categoría '{categoria}' sobre: '{tema}'. Reglas estrictas: 1. El artículo DEBE estar escrito íntegramente en español de Latinoamérica. 2. La respuesta debe ser únicamente un objeto JSON válido, sin texto antes o después. Formato: {{"title": "...", "summary": "...", "content_html": "..."}}"""
@@ -108,7 +112,6 @@ def crear_archivo_post(contenido, todos_los_posts):
                 cards_html += f"""<article class="article-card"><a href="/{post_path.as_posix()}"><img src="/static/img/{imagen_aleatoria}" alt="Artículo"></a><div class="card-content"><span class="category-tag {category.replace(' ', '-')}">{category}</span><h3><a href="/{post_path.as_posix()}">{title}</a></h3></div></article>"""
         if cards_html:
             related_posts_html = f"""<section class="related-articles"><h2>Artículos que podrían interesarte</h2><div class="article-grid">{cards_html}</div></section>"""
-
     article_content = f"""<div class="main-container"><main class="article-body"><article><h1 class="article-title">{contenido['title']}</h1><p class="article-meta">Publicado por Redacción sIA el {fecha_actual} en <span class="category-tag {contenido['category'].replace(' ', '-')}">{contenido['category']}</span></p><div class="article-content">{contenido['content_html']}</div></article>{related_posts_html}</main></div>"""
     full_html = HTML_HEADER.format(title=contenido['title']) + article_content + HTML_FOOTER
     with open(POSTS_DIR / nombre_archivo, "w", encoding="utf-8") as f: f.write(full_html)
@@ -120,7 +123,6 @@ def actualizar_index(todos_los_posts):
     for post in todos_los_posts:
         _, category = get_post_details(post)
         if category and category in posts_por_categoria: posts_por_categoria[category].append(post)
-
     def crear_grid_html(posts, num_items):
         grid_html = ""
         for post_path in posts[:num_items]:
@@ -129,23 +131,12 @@ def actualizar_index(todos_los_posts):
                 imagen_aleatoria = random.choice(LISTA_DE_IMAGENES)
                 grid_html += f"""<article class="article-card"><a href="/{post_path.as_posix()}"><img src="/static/img/{imagen_aleatoria}" alt="Artículo"></a><div class="card-content"><span class="category-tag {category.replace(' ', '-')}">{category}</span><h3><a href="/{post_path.as_posix()}">{title}</a></h3></div></article>"""
         return grid_html
-
-    # --- CORREGIDO: Lógica para mostrar todas las secciones ---
     index_main_content = """<div class="main-container">"""
-    # Sección de Noticias
-    if posts_por_categoria["Noticias"]:
-        index_main_content += f"""<h2 class="section-title"><a href="/noticias.html">Últimas Noticias</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Noticias"], 6)}</div>"""
-    # Sección de Opinión
-    if posts_por_categoria["Opinión"]:
-        index_main_content += f"""<h2 class="section-title"><a href="/opinion.html">Opinión</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Opinión"], 3)}</div>"""
-    # Sección de Herramientas IA
-    if posts_por_categoria["Herramientas IA"]:
-        index_main_content += f"""<h2 class="section-title"><a href="/herramientas.html">Herramientas IA</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Herramientas IA"], 3)}</div>"""
-    # Sección de IA para Todos
-    if posts_por_categoria["IA para Todos"]:
-        index_main_content += f"""<h2 class="section-title"><a href="/ia-para-todos.html">IA para Todos</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["IA para Todos"], 3)}</div>"""
+    if posts_por_categoria["Noticias"]: index_main_content += f"""<h2 class="section-title"><a href="/noticias.html">Últimas Noticias</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Noticias"], 6)}</div>"""
+    if posts_por_categoria["Opinión"]: index_main_content += f"""<h2 class="section-title"><a href="/opinion.html">Opinión</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Opinión"], 3)}</div>"""
+    if posts_por_categoria["Herramientas IA"]: index_main_content += f"""<h2 class="section-title"><a href="/herramientas.html">Herramientas IA</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Herramientas IA"], 3)}</div>"""
+    if posts_por_categoria["IA para Todos"]: index_main_content += f"""<h2 class="section-title"><a href="/ia-para-todos.html">IA para Todos</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["IA para Todos"], 3)}</div>"""
     index_main_content += "</div>"
-    
     full_html = HTML_HEADER.format(title="sIA - Inteligencia Artificial en Latinoamérica") + index_main_content + HTML_FOOTER
     with open(ROOT_DIR / "index.html", "w", encoding="utf-8") as f: f.write(full_html)
     print("✅ index.html actualizado.")
@@ -168,7 +159,6 @@ def crear_pagina_privacidad():
     full_html = HTML_HEADER.format(title="Política de Privacidad - sIA") + PRIVACY_POLICY_CONTENT + HTML_FOOTER
     with open(ROOT_DIR / "privacy.html", "w", encoding="utf-8") as f: f.write(full_html)
 
-# --- BLOQUE DE EJECUCIÓN PRINCIPAL ---
 if __name__ == "__main__":
     funciones = {
         "Noticias": (client_news, temas_noticias, "Eres un periodista de tecnología..."),
@@ -176,24 +166,19 @@ if __name__ == "__main__":
         "Herramientas IA": (client_herramientas, temas_herramientas, "Eres un reseñador de productos..."),
         "IA para Todos": (client_recursos, temas_recursos, "Eres un educador de tecnología...")
     }
-    
     categoria_elegida = random.choices(list(funciones.keys()), weights=[0.55, 0.15, 0.15, 0.15], k=1)[0]
     cliente_a_usar, lista_de_temas, system_prompt = funciones[categoria_elegida]
-    
     if lista_de_temas:
         tema_elegido = random.choice(lista_de_temas)
-        lista_de_temas.remove(tema_elegido) # Evita repetición inmediata
+        lista_de_temas.remove(tema_elegido)
     else:
         tema_elegido = "un tema de actualidad sobre IA en Latinoamérica"
-
     print(f"--- Decisión: Generar '{categoria_elegida}' sobre '{tema_elegido}' ---")
     contenido_nuevo = generar_contenido_base(cliente_a_usar, system_prompt, categoria_elegida, tema_elegido)
-    
     if contenido_nuevo:
         posts_actuales = sorted(list(POSTS_DIR.glob("*.html")), key=lambda p: p.name, reverse=True)
         crear_archivo_post(contenido_nuevo, posts_actuales)
         posts_actualizados = sorted(list(POSTS_DIR.glob("*.html")), key=lambda p: p.name, reverse=True)
-        
         actualizar_index(posts_actualizados)
         crear_pagina_de_categoria("Noticias", "noticias.html", posts_actualizados)
         crear_pagina_de_categoria("Opinión", "opinion.html", posts_actualizados)
