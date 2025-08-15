@@ -4,22 +4,20 @@
     --fuchsia: #C2185B;
     --pink-accent: #FF4081;
     --turquoise: #009688;
-    --purple: #6A1B9A; /* Nuevo color para IA para Todos */
-    --orange: #E65100; /* Nuevo color para Herramientas */
+    --purple: #6A1B9A;
+    --orange: #E65100;
     --light-pink-bg: #F8F9FA;
     --white: #FFFFFF;
     --text-color: #333;
     --border-color: #E0E0E0;
     --font-primary: 'Inter', sans-serif;
 }
-
 /* --- Reseteo y Estilos Base --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font-primary); background-color: var(--light-pink-bg); color: var(--text-color); line-height: 1.6; }
 a { color: var(--fuchsia); text-decoration: none; transition: color 0.3s ease; }
 a:hover { color: var(--pink-accent); }
 img { max-width: 100%; height: auto; }
-
 /* --- Header y Navegación --- */
 header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background-color: var(--white); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000; }
 .logo { display: flex; align-items: center; }
@@ -29,10 +27,13 @@ nav ul { list-style: none; display: flex; gap: 2rem; }
 nav a { font-weight: 500; color: var(--dark-teal); }
 .subscribe-button { background-color: var(--fuchsia); color: var(--white); padding: 0.7rem 1.5rem; border-radius: 25px; font-weight: 700; transition: background-color 0.3s ease; }
 .subscribe-button:hover { background-color: var(--pink-accent); color: var(--white); }
-
-/* --- Contenido Principal y Grid --- */
-main { padding: 2rem; max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1fr 300px; gap: 2rem; }
-.main-content { flex-grow: 1; }
+/* --- DISEÑO CORREGIDO: Contenido Principal --- */
+main {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+.main-content { width: 100%; }
 .section-title { font-size: 2rem; color: var(--dark-teal); margin-top: 2rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--turquoise); padding-bottom: 0.5rem; }
 .section-title:first-child { margin-top: 0; }
 .hero-article { background: var(--white); padding: 2rem; margin-bottom: 2rem; border: 1px solid var(--border-color); border-radius: 8px; }
@@ -45,47 +46,32 @@ main { padding: 2rem; max-width: 1400px; margin: 0 auto; display: grid; grid-tem
 .card-content .category-tag { align-self: flex-start; margin-bottom: 0.5rem; }
 .card-content h3 { font-size: 1.2rem; flex-grow: 1; }
 .card-content h3 a { color: var(--text-color); }
-
-/* --- Sidebar --- */
-.sidebar { flex-shrink: 0; }
-.widget { background-color: var(--white); padding: 1.5rem; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 2rem; }
-.widget h3 { color: var(--dark-teal); border-bottom: 2px solid var(--turquoise); padding-bottom: 0.5rem; margin-bottom: 1rem; }
-
+/* --- Sidebar (Ahora no se muestra en la home, pero dejamos los estilos) --- */
+.sidebar { display: none; } /* Ocultamos la sidebar en el layout principal por ahora */
 /* --- Página de Artículo Individual --- */
-.article-body { grid-column: 1 / -1; max-width: 800px; margin: 2rem auto; background-color: var(--white); padding: 3rem; border-radius: 8px; }
+.article-body { max-width: 800px; margin: 2rem auto; background-color: var(--white); padding: 3rem; border-radius: 8px; }
 .article-title { font-size: 2.5rem; color: var(--dark-teal); line-height: 1.2; margin-bottom: 1rem; }
 .article-meta { color: #555; margin-bottom: 2rem; font-weight: 500; }
 .article-content h2, .article-content h3 { color: var(--dark-teal); margin-top: 2rem; margin-bottom: 1rem; }
 .article-content p { margin-bottom: 1rem; }
 .category-tag { color: var(--white); padding: 0.3rem 0.6rem; border-radius: 5px; font-size: 0.8rem; font-weight: 700; background-color: var(--turquoise); }
-/* Colores por categoría */
 .category-tag.Noticias { background-color: var(--turquoise); }
 .category-tag.Opinión { background-color: var(--fuchsia); }
 .category-tag.IA-para-Todos { background-color: var(--purple); }
 .category-tag.Herramientas-IA { background-color: var(--orange); }
-
-/* --- Sección de Artículos Relacionados --- */
+/* --- Artículos Relacionados --- */
 .related-articles { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e0e0e0; }
 .related-articles h2 { font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center; color: var(--dark-teal); }
 .related-articles .article-grid { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-
-/* --- NUEVO: Estilos para Páginas de Sección --- */
-.main-content-full { grid-column: 1 / -1; }
+/* --- Estilos para Páginas de Sección --- */
+.main-content-full { padding: 2rem; max-width: 1400px; margin: 0 auto; }
 .page-title { font-size: 2.5rem; color: var(--dark-teal); margin-bottom: 2rem; border-bottom: 2px solid var(--turquoise); padding-bottom: 1rem; }
-
 /* --- Footer --- */
-footer { grid-column: 1 / -1; text-align: center; padding: 2rem; margin-top: 2rem; background-color: var(--dark-teal); color: var(--white); }
+footer { text-align: center; padding: 2rem; margin-top: 2rem; background-color: var(--dark-teal); color: var(--white); }
 footer a { color: var(--turquoise); }
-
 /* --- Menú Móvil --- */
 .hamburger-menu, .mobile-nav { display: none; }
 .desktop-nav { display: flex; }
-
-@media (max-width: 992px) {
-    main { grid-template-columns: 1fr; }
-    .sidebar { grid-row: 2; }
-}
-
 @media (max-width: 768px) {
     .desktop-nav { display: none; }
     header { flex-direction: row; justify-content: space-between; }
