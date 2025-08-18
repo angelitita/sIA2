@@ -1,4 +1,4 @@
-# --- EJECUTANDO SCRIPT v15.4: CORRECCIÓN DEFINITIVA DE PARSEO Y ESTRUCTURA ---
+# --- EJECUTANDO SCRIPT v17.0: VERSIÓN FINAL CON REPARADOR FUNCIONAL ---
 import os
 import datetime
 import json
@@ -9,7 +9,7 @@ import feedparser
 from groq import Groq
 from bs4 import BeautifulSoup
 
-print("--- INICIANDO SCRIPT DE GENERACIÓN DE CONTENIDO v15.4 ---")
+print("--- INICIANDO SCRIPT DE GENERACIÓN DE CONTENIDO v17.0 ---")
 
 # --- INTERRUPTOR DE REPARACIÓN ---
 RECONSTRUIR_POSTS_ANTIGUOS = True
@@ -24,6 +24,7 @@ try:
     print("✅ Cliente de Groq configurado.")
 except Exception as e:
     sys.exit(f"❌ Error al configurar cliente de Groq: {e}")
+
 IMG_DIR = Path("static/img")
 LISTA_DE_IMAGENES = []
 try:
@@ -34,6 +35,7 @@ except Exception:
     LISTA_DE_IMAGENES = ["logo.png"]
 POSTS_DIR = Path("posts")
 ROOT_DIR = Path(".")
+
 temas_opinion = ["una columna de opinión sobre el Rabbit R1.", "un análisis crítico de las gafas Ray-Ban Meta.", "una opinión sobre Suno AI."]
 temas_herramientas = ["una comparativa detallada: Midjourney vs. Stable Diffusion.", "una guía de las 5 mejores IAs para editar video.", "una reseña a fondo de Notion AI."]
 
@@ -51,43 +53,64 @@ PRIVACY_POLICY_CONTENT = """<main class="article-body" style="margin-top: 2rem;"
 
 # --- LÓGICA DE CONTENIDO ---
 def obtener_noticia_real_de_rss():
-    # ... (código sin cambios)
-    pass
-def generar_contenido_ia(categoria, tema):
-    # ... (código sin cambios)
-    pass
-def reescribir_noticia_con_ia(noticia):
-    # ... (código sin cambios)
-    pass
+    print("📡 Buscando noticias reales en RSS...")
+    if not HISTORIAL_FILE.exists(): HISTORIAL_FILE.touch()
+    with open(HISTORIAL_FILE, "r") as f:
+        historial = [line.strip() for line in f.readlines()]
+    for feed_url in RSS_FEEDS:
+        feed = feedparser.parse(feed_url)
+        if feed.entries:
+            noticia = feed.entries[0]
+            if noticia.link not in historial:
+                print(f"✅ Noticia real encontrada: '{noticia.title}'")
+                return {"titulo": noticia.title, "link": noticia.link, "resumen": BeautifulSoup(noticia.summary, "html.parser").get_text(separator=' ', strip=True)}
+    return None
 
-# --- FUNCIONES DE CREACIÓN DE PÁGINAS (CORREGIDAS) ---
-def get_post_details(file_path):
-    # CORRECCIÓN: Esta función ahora es más robusta para encontrar los datos.
+def generar_contenido_ia(categoria, tema):
+    print(f"🤖 Generando contenido IA para '{categoria}'...")
+    system_prompt = f"Eres un experto en IA para el blog 'sIA'. Escribe un artículo de '{categoria}'. El artículo DEBE estar en español."
+    user_prompt = f"""Escribe un artículo sobre: '{tema}'. Formato JSON: {{"title": "...", "summary": "...", "content_html": "..."}}"""
+    try:
+        chat_completion = client_groq.chat.completions.create(messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}], model="llama3-8b-8192", response_format={"type": "json_object"})
+        contenido = json.loads(chat_completion.choices[0].message.content)
+        contenido['category'] = categoria
+        return contenido
+    except Exception as e:
+        print(f"❌ Error al generar contenido IA: {e}", file=sys.stderr)
+        return None
+
+def reescribir_noticia_con_ia(noticia):
+    print("🤖 Reescribiendo noticia real con IA...")
+    system_prompt = "Eres un periodista para 'sIA'. Reescribe noticias de otras fuentes en un artículo original y atractivo. DEBE estar en español."
+    user_prompt = f"""Basado en: Título: "{noticia['titulo']}", Resumen: "{noticia['resumen']}", Fuente: "{noticia['link']}", escribe un artículo. Formato JSON: {{"title": "...", "summary": "...", "content_html": "..."}}"""
+    try:
+        chat_completion = client_groq.chat.completions.create(messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}], model="llama3-8b-8192", response_format={"type": "json_object"})
+        contenido = json.loads(chat_completion.choices[0].message.content)
+        contenido['source_link'] = noticia['link']
+        contenido['category'] = "Noticias"
+        return contenido
+    except Exception as e:
+        print(f"❌ Error al reescribir noticia: {e}", file=sys.stderr)
+        return None
+
+# --- FUNCIONES DE CREACIÓN DE PÁGINAS ---
+def get_post_details_for_index(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             soup = BeautifulSoup(f, "html.parser")
-            
-            # Intenta encontrar el contenido principal del artículo
-            article_body = soup.find("main", class_="article-body")
-            if not article_body:
-                return "Sin Título", "Noticias", ""
-
-            title_tag = article_body.find("h1", class_="article-title")
+            title_tag = soup.find("h1", class_="article-title")
             title = title_tag.string.strip() if title_tag and title_tag.string else "Sin Título"
-            
-            category_tag = article_body.find("span", class_="category-tag")
+            category_tag = soup.find("span", class_="category-tag")
             category = category_tag.string.strip() if category_tag and category_tag.string else "Noticias"
-            
-            article_content_tag = article_body.find("div", class_="article-content")
-            article_content = str(article_content_tag) if article_content_tag else ""
-            
-            return title, category, article_content
-    except Exception:
-        return "Sin Título", "Noticias", ""
+            return title, category
+    except Exception: return "Sin Título", "Noticias"
 
-def crear_html_de_post(contenido):
-    # CORRECCIÓN: Se centraliza la creación del HTML del post en una sola función.
+def crear_archivo_post(contenido):
+    POSTS_DIR.mkdir(exist_ok=True)
     fecha_actual = datetime.datetime.now().strftime("%d de %B de %Y")
+    slug_base = contenido["title"].lower().replace(" ", "-").replace(":", "").replace("?", "").replace("¿", "")
+    slug = f"{slug_base[:50]}-{datetime.datetime.now().strftime('%H%M%S')}"
+    nombre_archivo = f"{datetime.date.today().strftime('%Y-%m-%d')}-{slug}.html"
     source_html = f'<p><em>Fuente original: <a href="{contenido.get("source_link", "#")}" target="_blank" rel="noopener noreferrer">Leer más</a></em></p>' if 'source_link' in contenido else ''
     
     article_html = f"""
@@ -99,16 +122,7 @@ def crear_html_de_post(contenido):
         </article>
     </main>
     """
-    return HTML_HEADER.format(title=contenido['title']) + article_html + HTML_FOOTER
-
-def crear_archivo_post(contenido):
-    POSTS_DIR.mkdir(exist_ok=True)
-    slug_base = contenido["title"].lower().replace(" ", "-").replace(":", "").replace("?", "").replace("¿", "")
-    slug = f"{slug_base[:50]}-{datetime.datetime.now().strftime('%H%M%S')}"
-    nombre_archivo = f"{datetime.date.today().strftime('%Y-%m-%d')}-{slug}.html"
-    
-    full_html = crear_html_de_post(contenido)
-    
+    full_html = HTML_HEADER.format(title=contenido['title']) + article_html + HTML_FOOTER
     with open(POSTS_DIR / nombre_archivo, "w", encoding="utf-8") as f: f.write(full_html)
     print(f"📄 Archivo de post creado: {nombre_archivo}")
     if 'source_link' in contenido:
@@ -118,14 +132,14 @@ def actualizar_paginas(todos_los_posts):
     print("🔄 Actualizando páginas (index, categorías, etc.)...")
     posts_por_categoria = {"Noticias": [], "Herramientas IA": [], "Opinión": []}
     for post in todos_los_posts:
-        title, category, _ = get_post_details(post)
-        if title != "Sin Título" and category and category in posts_por_categoria:
+        title, category = get_post_details_for_index(post)
+        if title != "Sin Título" and category in posts_por_categoria:
             posts_por_categoria[category].append(post)
 
     def crear_grid_html(posts, num_items):
         grid_html = ""
         for post_path in posts[:num_items]:
-            title, category, _ = get_post_details(post_path)
+            title, category = get_post_details_for_index(post_path)
             if title:
                 imagen_aleatoria = random.choice(LISTA_DE_IMAGENES)
                 grid_html += f"""<article class="article-card"><a href="/{post_path.as_posix()}"><img src="/static/img/{imagen_aleatoria}" alt="Artículo"></a><div class="card-content"><span class="category-tag {category.replace(' ', '-')}">{category}</span><h3><a href="/{post_path.as_posix()}">{title}</a></h3></div></article>"""
@@ -140,64 +154,85 @@ def actualizar_paginas(todos_los_posts):
     with open(ROOT_DIR / "index.html", "w", encoding="utf-8") as f: f.write(full_html_index)
 
     for categoria, posts in posts_por_categoria.items():
-        nombre_archivo = f"{categoria.lower().replace(' ', '-')}.html"
-        grid_categoria = crear_grid_html(posts, len(posts))
-        main_categoria = f"""<div class="main-container"><main class="main-content-full"><h1 class="page-title">Artículos de {categoria}</h1><div class="article-grid">{grid_categoria}</div></main></div>"""
-        full_html_categoria = HTML_HEADER.format(title=f"{categoria} - sIA") + main_categoria + HTML_FOOTER
-        with open(ROOT_DIR / nombre_archivo, "w", encoding="utf-8") as f: f.write(full_html_categoria)
+        if posts:
+            nombre_archivo = f"{categoria.lower().replace(' ', '-')}.html"
+            grid_categoria = crear_grid_html(posts, len(posts))
+            main_categoria = f"""<div class="main-container"><main class="main-content-full"><h1 class="page-title">Artículos de {categoria}</h1><div class="article-grid">{grid_categoria}</div></main></div>"""
+            full_html_categoria = HTML_HEADER.format(title=f"{categoria} - sIA") + main_categoria + HTML_FOOTER
+            with open(ROOT_DIR / nombre_archivo, "w", encoding="utf-8") as f: f.write(full_html_categoria)
 
 def crear_pagina_privacidad():
     full_html = HTML_HEADER.format(title="Política de Privacidad - sIA") + PRIVACY_POLICY_CONTENT + HTML_FOOTER
     with open(ROOT_DIR / "privacy.html", "w", encoding="utf-8") as f: f.write(full_html)
 
-def reparar_posts_antiguos():
+def reparar_posts_antiguos(todos_los_posts):
     print("🛠️ INICIANDO MODO REPARACIÓN DE POSTS ANTIGUOS...")
-    posts_a_reparar = list(POSTS_DIR.glob("*.html"))
-    if not posts_a_reparar:
-        print("No se encontraron posts para reparar.")
-        return
-    for post_path in posts_a_reparar:
-        print(f"Reparando: {post_path.name}")
-        title, _, _ = get_post_details(post_path) # Solo necesitamos el título para el <title> del head
-        if not title or title == "Sin Título":
-             print(f"⚠️  Saltando {post_path.name}, no se pudo leer el título original.")
-             continue
-        with open(post_path, "r", encoding="utf-8") as f:
-            soup = BeautifulSoup(f, "html.parser")
-            # Extrae solo el <article> completo, que es el contenido único de cada post
-            article_tag = soup.find("article")
-            if article_tag:
-                repaired_content = f"""<div class="main-container"><main class="article-body">{str(article_tag)}</main></div>"""
-                full_repaired_html = HTML_HEADER.format(title=title) + repaired_content + HTML_FOOTER
-                with open(post_path, "w", encoding="utf-8") as f: f.write(full_repaired_html)
-            else:
-                print(f"⚠️  No se pudo encontrar la etiqueta <article> en {post_path.name}.")
+    for post_path in todos_los_posts:
+        print(f"Intentando reparar: {post_path.name}")
+        try:
+            with open(post_path, "r", encoding="utf-8") as f:
+                soup = BeautifulSoup(f, "html.parser")
+            
+            # Extrae el contenido central como texto, pase lo que pase
+            content_tag = soup.find("div", class_="article-content") or soup.find("article") or soup.find("main")
+            if not content_tag:
+                print(f"⚠️  Saltando {post_path.name}, no se pudo encontrar contenido central.")
+                continue
+
+            # Genera un título desde el nombre del archivo
+            slug_title = post_path.name[11:-12].replace("-", " ").capitalize()
+            
+            # Asigna una categoría por defecto
+            category = "Noticias"
+            
+            # Extrae la fecha del nombre del archivo
+            date_str = post_path.name[:10]
+            fecha_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d")
+            meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+            fecha_reparada = f"{fecha_obj.day} de {meses[fecha_obj.month - 1]} de {fecha_obj.year}"
+            
+            # Reconstruye el post con la estructura correcta
+            repaired_article_html = f"""
+            <main class="article-body">
+                <article>
+                    <h1 class="article-title">{slug_title}</h1>
+                    <p class="article-meta">Publicado por Redacción sIA el {fecha_reparada} en <span class="category-tag {category.replace(' ', '-')}">{category}</span></p>
+                    <div class="article-content">{str(content_tag)}</div>
+                </article>
+            </main>
+            """
+            full_repaired_html = HTML_HEADER.format(title=slug_title) + repaired_article_html + HTML_FOOTER
+            with open(post_path, "w", encoding="utf-8") as f:
+                f.write(full_repaired_html)
+            print(f"✅ Reparado: {post_path.name}")
+        except Exception as e:
+            print(f"⚠️  Error al reparar {post_path.name}: {e}")
     print("✅ REPARACIÓN COMPLETADA.")
 
 if __name__ == "__main__":
+    posts_actuales = sorted(list(POSTS_DIR.glob("*.html")), key=lambda p: p.name, reverse=True)
+    
     if RECONSTRUIR_POSTS_ANTIGUOS:
-        reparar_posts_antiguos()
+        reparar_posts_antiguos(posts_actuales)
     else:
-        # Flujo normal de generación
         contenido_final = None
         noticia_real = obtener_noticia_real_de_rss()
         if noticia_real:
             contenido_final = reescribir_noticia_con_ia(noticia_real)
         else:
-            print("ℹ️ No hubo noticias reales, se generará contenido IA.")
+            print("ℹ️ No hubo noticias reales nuevas, se generará contenido IA original.")
             categoria_ia, temas_ia = random.choice([("Opinión", temas_opinion), ("Herramientas IA", temas_herramientas)])
             tema_elegido = random.choice(temas_ia)
             if temas_ia: temas_ia.remove(tema_elegido)
             contenido_final = generar_contenido_ia(categoria_ia, tema_elegido)
+        
         if contenido_final:
             crear_archivo_post(contenido_final)
         else:
             print("\n❌ No se pudo generar contenido. La ejecución fallará.", file=sys.stderr)
             sys.exit(1)
     
-    # Siempre actualizamos todas las páginas al final
     posts_actualizados = sorted(list(POSTS_DIR.glob("*.html")), key=lambda p: p.name, reverse=True)
     actualizar_paginas(posts_actualizados)
     crear_pagina_privacidad()
     print("\n🎉 ¡Proceso completado exitosamente!")
-
