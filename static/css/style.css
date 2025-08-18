@@ -71,6 +71,12 @@ header {
 .category-tag.IA-para-Todos { background-color: var(--purple); }
 .category-tag.Herramientas-IA { background-color: var(--orange); }
 
+/* --- SECCIÓN DE COMENTARIOS --- */
+#cusdis_thread iframe {
+    width: 100% !important;
+    min-height: 400px !important;
+}
+
 /* --- FOOTER --- */
 footer { text-align: center; padding: 2rem; margin-top: 2rem; background-color: var(--dark-teal); color: var(--white); }
 footer a { color: var(--turquoise); }
