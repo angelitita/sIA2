@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 print("--- INICIANDO SCRIPT DE GENERACIÓN DE CONTENIDO v15.4 ---")
 
 # --- INTERRUPTOR DE REPARACIÓN ---
-RECONSTRUIR_POSTS_ANTIGUOS = False
+RECONSTRUIR_POSTS_ANTIGUOS = True
 
 # --- CONFIGURACIÓN ---
 RSS_FEEDS = ["https://www.infobae.com/feeds/rss/america/tecno/", "https://es.wired.com/feed/rss", "https://www.xataka.com/tag/inteligencia-artificial/feed/"]
@@ -200,3 +200,4 @@ if __name__ == "__main__":
     actualizar_paginas(posts_actualizados)
     crear_pagina_privacidad()
     print("\n🎉 ¡Proceso completado exitosamente!")
+
