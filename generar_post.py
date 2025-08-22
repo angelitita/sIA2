@@ -1,4 +1,4 @@
-# --- EJECUTANDO SCRIPT v19.0: VERSIÓN FINAL Y COMPLETA ---
+# --- EJECUTANDO SCRIPT v19.1: LIMPIEZA FINAL Y CORRECCIONES ---
 import os
 import datetime
 import json
@@ -9,10 +9,10 @@ import feedparser
 from groq import Groq
 from bs4 import BeautifulSoup
 
-print("--- INICIANDO SCRIPT DE GENERACIÓN DE CONTENIDO v19.0 ---")
+print("--- INICIANDO SCRIPT DE GENERACIÓN DE CONTENIDO v19.1 ---")
 
 # --- CONFIGURACIÓN ---
-CUSDIS_APP_ID = "f6cbff1c-928c-4ac4-b85a-c76024284179"
+CUSDIS_APP_ID = "f6cbff1c-928c-4ac4-b85a-c76024284179" # Reemplaza si tienes uno nuevo
 RSS_FEEDS = ["https://www.infobae.com/feeds/rss/america/tecno/", "https://es.wired.com/feed/rss", "https://www.xataka.com/tag/inteligencia-artificial/feed/"]
 HISTORIAL_FILE = Path("historial_noticias.txt")
 try:
@@ -43,13 +43,13 @@ HTML_HEADER = """<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><met
 <link rel="stylesheet" href="/static/css/style.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"><link rel="icon" href="/static/img/logo.png" type="image/png"></head><body>
 <header>
     <div class="logo"><img src="/static/img/logo.png" alt="sIA Logo"><h1><a href="/index.html">sIA</a></h1></div>
-    <nav class="desktop-nav"><ul><li><a href="/noticias.html">Noticias</a></li><li><a href="/herramientas.html">Herramientas IA</a></li><li><a href="/opinion.html">Opinión</a></li></ul></nav>
+    <nav class="desktop-nav"><ul><li><a href="/noticias.html">Noticias</a></li><li><a href="/herramientas-ia.html">Herramientas IA</a></li><li><a href="/opinión.html">Opinión</a></li></ul></nav>
     <a href="https://docs.google.com/forms/d/e/1FAIpQLSeNl4keU0p1eDMvzUpM5p57Naf5qBMsl5MSJNBMxPnWbofshQ/viewform?usp=header" target="_blank" class="subscribe-button desktop-nav">Suscríbete</a>
     <button class="hamburger-menu" aria-label="Abrir menú"><span></span></button>
 </header>
-<div class="mobile-nav"><nav><ul><li><a href="/noticias.html">Noticias</a></li><li><a href="/herramientas.html">Herramientas IA</a></li><li><a href="/opinion.html">Opinión</a></li></ul></nav><a href="https://docs.google.com/forms/d/e/1FAIpQLSeNl4keU0p1eDMvzUpM5p57Naf5qBMsl5MSJNBMxPnWbofshQ/viewform?usp=header" target="_blank" class="subscribe-button">Suscríbete</a></div>"""
+<div class="mobile-nav"><nav><ul><li><a href="/noticias.html">Noticias</a></li><li><a href="/herramientas-ia.html">Herramientas IA</a></li><li><a href="/opinión.html">Opinión</a></li></ul></nav><a href="https://docs.google.com/forms/d/e/1FAIpQLSeNl4keU0p1eDMvzUpM5p57Naf5qBMsl5MSJNBMxPnWbofshQ/viewform?usp=header" target="_blank" class="subscribe-button">Suscríbete</a></div>"""
 HTML_FOOTER = """<footer><p>&copy; 2025 sIA. Todos los derechos reservados.</p><p><a href="/privacy.html">Política de Privacidad</a></p></footer><script>const hamburger = document.querySelector('.hamburger-menu');const mobileNav = document.querySelector('.mobile-nav');const body = document.querySelector('body');hamburger.addEventListener('click', () => {hamburger.classList.toggle('is-active');mobileNav.classList.toggle('is-active');body.classList.toggle('no-scroll');});</script></body></html>"""
-PRIVACY_POLICY_CONTENT = """<main class="article-body" style="margin-top: 2rem;"><h1 class="article-title">Política de Privacidad</h1><div class="article-content"><p><strong>Fecha de vigencia:</strong> 20 de agosto de 2025</p><p>Bienvenido a sIA. Esta Política de Privacidad describe qué datos recopilamos y cómo los usamos...</p></div></main>"""
+PRIVACY_POLICY_CONTENT = """<main class="article-body" style="margin-top: 2rem;"><h1 class="article-title">Política de Privacidad</h1><div class="article-content"><p><strong>Fecha de vigencia:</strong> 22 de agosto de 2025</p><h2>1. Introducción</h2><p>Bienvenido a sIA. Tu privacidad es de suma importancia para nosotros. Esta Política de Privacidad describe qué datos recopilamos, cómo los usamos, cómo los protegemos y qué opciones tienes sobre tus datos cuando visitas nuestro sitio web.</p><h2>2. Información que Recopilamos</h2><ul><li><strong>Información No Personal:</strong> Recopilamos datos anónimos sobre tu visita (como tipo de navegador, país de origen, etc.) a través de servicios de análisis web para entender mejor a nuestra audiencia. No recopilamos información personal identificable como nombres o correos electrónicos, a menos que te suscribas voluntariamente a nuestro boletín.</li></ul><h2>3. Uso de la Información</h2><p>La información anónima recopilada se utiliza exclusivamente para mejorar el contenido y la experiencia de usuario en nuestro sitio web. Si te suscribes a nuestro boletín, tu correo electrónico se usará únicamente para enviarte nuevas publicaciones.</p><h2>4. Cookies y Terceros</h2><p>Podemos participar en programas de afiliados y redes publicitarias. Estos servicios de terceros pueden usar cookies para mostrar anuncios relevantes. Puedes gestionar tus preferencias en la configuración de cada plataforma respectiva.</p><h2>5. Comentarios</h2><p>Nuestro sistema de comentarios es gestionado por un proveedor externo (Cusdis). Al comentar, puedes hacerlo de forma anónima o con un apodo. La información que proporciones en los comentarios es pública.</p></div></main>"""
 
 def obtener_noticia_real_de_rss():
     print("📡 Buscando noticias reales en RSS...")
@@ -80,7 +80,7 @@ def generar_contenido_ia(categoria, tema):
 
 def reescribir_noticia_con_ia(noticia):
     print("🤖 Reescribiendo noticia real con IA...")
-    system_prompt = "Eres un periodista para 'sIA'. Reescribe noticias en un artículo original y atractivo. DEBE estar en español."
+    system_prompt = "Eres un periodista para 'sIA'. Reescribe noticias de otras fuentes en un artículo original y atractivo. DEBE estar en español."
     user_prompt = f"""Basado en: Título: "{noticia['titulo']}", Resumen: "{noticia['resumen']}", Fuente: "{noticia['link']}", escribe un artículo. Formato JSON: {{"title": "...", "summary": "...", "content_html": "..."}}"""
     try:
         chat_completion = client_groq.chat.completions.create(messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}], model="llama3-8b-8192", response_format={"type": "json_object"})
@@ -109,8 +109,6 @@ def crear_archivo_post(contenido, todos_los_posts):
     slug_base = contenido["title"].lower().replace(" ", "-").replace(":", "").replace("?", "").replace("¿", "")
     slug = f"{slug_base[:50]}-{datetime.datetime.now().strftime('%H%M%S')}"
     nombre_archivo = f"{datetime.date.today().strftime('%Y-%m-%d')}-{slug}.html"
-    
-    # Sección de Artículos Relacionados
     related_posts_html = ""
     posts_aleatorios = [p for p in todos_los_posts if p.name != nombre_archivo]
     random.shuffle(posts_aleatorios)
@@ -121,14 +119,9 @@ def crear_archivo_post(contenido, todos_los_posts):
         if title != "Sin Título":
             imagen_aleatoria = random.choice(LISTA_DE_IMAGENES)
             cards_html += f"""<article class="article-card"><a href="/{post_path.as_posix()}"><img src="/static/img/{imagen_aleatoria}" alt="{title}"></a><div class="card-content"><span class="category-tag {category.replace(' ', '-')}">{category}</span><h3><a href="/{post_path.as_posix()}">{title}</a></h3></div></article>"""
-    if cards_html:
-        related_posts_html = f"""<section class="related-articles"><h2>Artículos que podrían interesarte</h2><div class="article-grid">{cards_html}</div></section>"""
-
-    # Sección de Comentarios
+    if cards_html: related_posts_html = f"""<section class="related-articles"><h2>Artículos que podrían interesarte</h2><div class="article-grid">{cards_html}</div></section>"""
     comments_section_html = f"""<section class="comments-section"><h2>Comentarios</h2><div id="cusdis_thread" data-host="https://cusdis.com" data-app-id="{CUSDIS_APP_ID}" data-page-id="{nombre_archivo}" data-page-url="/posts/{nombre_archivo}" data-page-title="{contenido['title']}"></div><script async defer src="https://cusdis.com/js/cusdis.es.js"></script></section>"""
-    
     source_html = f'<p><em>Fuente original: <a href="{contenido.get("source_link", "#")}" target="_blank" rel="noopener noreferrer">Leer más</a></em></p>' if 'source_link' in contenido else ''
-    
     article_html = f"""<main class="article-body"><article><h1 class="article-title">{contenido['title']}</h1><p class="article-meta">Publicado por Redacción sIA el {fecha_actual} en <span class="category-tag {contenido['category'].replace(' ', '-')}">{contenido['category']}</span></p><div class="article-content">{contenido['content_html']}{source_html}</div></article>{comments_section_html}{related_posts_html}</main>"""
     full_html = HTML_HEADER.format(title=contenido['title'], summary=contenido.get('summary', '')) + article_html + HTML_FOOTER
     with open(POSTS_DIR / nombre_archivo, "w", encoding="utf-8") as f: f.write(full_html)
@@ -155,18 +148,22 @@ def actualizar_paginas(todos_los_posts):
 
     index_main_content = """<div class="main-container">"""
     if posts_por_categoria["Noticias"]: index_main_content += f"""<h2 class="section-title"><a href="/noticias.html">Últimas Noticias</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Noticias"], 6)}</div>"""
-    if posts_por_categoria["Herramientas IA"]: index_main_content += f"""<h2 class="section-title"><a href="/herramientas.html">Herramientas IA</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Herramientas IA"], 3)}</div>"""
-    if posts_por_categoria["Opinión"]: index_main_content += f"""<h2 class="section-title"><a href="/opinion.html">Opinión</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Opinión"], 3)}</div>"""
+    if posts_por_categoria["Herramientas IA"]: index_main_content += f"""<h2 class="section-title"><a href="/herramientas-ia.html">Herramientas IA</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Herramientas IA"], 3)}</div>"""
+    if posts_por_categoria["Opinión"]: index_main_content += f"""<h2 class="section-title"><a href="/opinión.html">Opinión</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Opinión"], 3)}</div>"""
     index_main_content += "</div>"
-    full_html_index = HTML_HEADER.format(title="sIA - Inteligencia Artificial en Latinoamérica", summary="Noticias y análisis sobre Inteligencia Artificial en Latinoamérica.") + index_main_content + HTML_FOOTER
+    full_html_index = HTML_HEADER.format(title="sIA - Inteligencia Artificial en Latinoamérica", summary="Noticias y análisis sobre IA en Latinoamérica.") + index_main_content + HTML_FOOTER
     with open(ROOT_DIR / "index.html", "w", encoding="utf-8") as f: f.write(full_html_index)
 
     for categoria, posts in posts_por_categoria.items():
         if posts:
+            # Corrección del nombre del archivo para que coincida con el menú
             nombre_archivo = f"{categoria.lower().replace(' ', '-')}.html"
+            if categoria == "Herramientas IA": nombre_archivo = "herramientas-ia.html"
+            if categoria == "Opinión": nombre_archivo = "opinión.html"
+
             grid_categoria = crear_grid_html(posts, len(posts))
             main_categoria = f"""<div class="main-container"><main class="main-content-full"><h1 class="page-title">Artículos de {categoria}</h1><div class="article-grid">{grid_categoria}</div></main></div>"""
-            full_html_categoria = HTML_HEADER.format(title=f"{categoria} - sIA", summary=f"Todos los artículos de la categoría {categoria}") + main_categoria + HTML_FOOTER
+            full_html_categoria = HTML_HEADER.format(title=f"{categoria} - sIA", summary=f"Artículos de {categoria}") + main_categoria + HTML_FOOTER
             with open(ROOT_DIR / nombre_archivo, "w", encoding="utf-8") as f: f.write(full_html_categoria)
 
 def crear_pagina_privacidad():
