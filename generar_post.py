@@ -1,4 +1,4 @@
-# --- EJECUTANDO SCRIPT v19.1: INTEGRACIÓN CON GOOGLE ADSENSE ---
+# --- EJECUTANDO SCRIPT v19.2: CORRECCIÓN FINAL DE ENLACES ---
 import os
 import datetime
 import json
@@ -9,7 +9,7 @@ import feedparser
 from groq import Groq
 from bs4 import BeautifulSoup
 
-print("--- INICIANDO SCRIPT DE GENERACIÓN DE CONTENIDO v19.1 ---")
+print("--- INICIANDO SCRIPT DE GENERACIÓN DE CONTENIDO v19.2 ---")
 
 # --- CONFIGURACIÓN ---
 CUSDIS_APP_ID = "f6cbff1c-928c-4ac4-b85a-c76024284179"
@@ -40,20 +40,16 @@ temas_herramientas = ["una comparativa detallada: Midjourney vs. Stable Diffusio
 # --- PLANTILLAS HTML ---
 HTML_HEADER = """<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{title}</title>
 <meta name="description" content="{summary}">
-<link rel="stylesheet" href="/static/css/style.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"><link rel="icon" href="/static/img/logo.png" type="image/png">
-
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6306514511826618" crossorigin="anonymous"></script>
-
-</head><body>
+<link rel="stylesheet" href="/static/css/style.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"><link rel="icon" href="/static/img/logo.png" type="image/png"></head><body>
 <header>
     <div class="logo"><img src="/static/img/logo.png" alt="sIA Logo"><h1><a href="/index.html">sIA</a></h1></div>
-    <nav class="desktop-nav"><ul><li><a href="/noticias.html">Noticias</a></li><li><a href="/herramientas.html">Herramientas IA</a></li><li><a href="/opinion.html">Opinión</a></li></ul></nav>
+    <nav class="desktop-nav"><ul><li><a href="/noticias.html">Noticias</a></li><li><a href="/herramientas-ia.html">Herramientas IA</a></li><li><a href="/opinion.html">Opinión</a></li></ul></nav>
     <a href="https://docs.google.com/forms/d/e/1FAIpQLSeNl4keU0p1eDMvzUpM5p57Naf5qBMsl5MSJNBMxPnWbofshQ/viewform?usp=header" target="_blank" class="subscribe-button desktop-nav">Suscríbete</a>
     <button class="hamburger-menu" aria-label="Abrir menú"><span></span></button>
 </header>
-<div class="mobile-nav"><nav><ul><li><a href="/noticias.html">Noticias</a></li><li><a href="/herramientas.html">Herramientas IA</a></li><li><a href="/opinion.html">Opinión</a></li></ul></nav><a href="https://docs.google.com/forms/d/e/1FAIpQLSeNl4keU0p1eDMvzUpM5p57Naf5qBMsl5MSJNBMxPnWbofshQ/viewform?usp=header" target="_blank" class="subscribe-button">Suscríbete</a></div>"""
+<div class="mobile-nav"><nav><ul><li><a href="/noticias.html">Noticias</a></li><li><a href="/herramientas-ia.html">Herramientas IA</a></li><li><a href="/opinion.html">Opinión</a></li></ul></nav><a href="https://docs.google.com/forms/d/e/1FAIpQLSeNl4keU0p1eDMvzUpM5p57Naf5qBMsl5MSJNBMxPnWbofshQ/viewform?usp=header" target="_blank" class="subscribe-button">Suscríbete</a></div>"""
 HTML_FOOTER = """<footer><p>&copy; 2025 sIA. Todos los derechos reservados.</p><p><a href="/privacy.html">Política de Privacidad</a></p></footer><script>const hamburger = document.querySelector('.hamburger-menu');const mobileNav = document.querySelector('.mobile-nav');const body = document.querySelector('body');hamburger.addEventListener('click', () => {hamburger.classList.toggle('is-active');mobileNav.classList.toggle('is-active');body.classList.toggle('no-scroll');});</script></body></html>"""
-PRIVACY_POLICY_CONTENT = """<main class="article-body" style="margin-top: 2rem;"><h1 class="article-title">Política de Privacidad</h1><div class="article-content"><p><strong>Fecha de vigencia:</strong> 22 de agosto de 2025</p><h2>1. Introducción</h2><p>Bienvenido a sIA. Tu privacidad es de suma importancia para nosotros. Esta Política de Privacidad describe qué datos recopilamos, cómo los usamos, cómo los protegemos y qué opciones tienes sobre tus datos cuando visitas nuestro sitio web.</p><h2>2. Información que Recopilamos</h2><ul><li><strong>Información No Personal:</strong> Recopilamos datos anónimos sobre tu visita (como tipo de navegador, país de origen, etc.) a través de servicios de análisis web para entender mejor a nuestra audiencia. No recopilamos información personal identificable como nombres o correos electrónicos, a menos que te suscribas voluntariamente a nuestro boletín.</li></ul><h2>3. Uso de la Información</h2><p>La información anónima recopilada se utiliza exclusivamente para mejorar el contenido y la experiencia de usuario en nuestro sitio web. Si te suscribes a nuestro boletín, tu correo electrónico se usará únicamente para enviarte nuevas publicaciones.</p><h2>4. Cookies y Terceros</h2><p>Utilizamos cookies para el funcionamiento básico del sitio. Podemos participar en programas de afiliados (como Amazon Afiliados) y redes publicitarias (como Google AdSense). Estos servicios de terceros pueden usar cookies para mostrar anuncios relevantes. Puedes gestionar tus preferencias de anuncios en la configuración de cada plataforma respectiva.</p><h2>5. Comentarios</h2><p>Nuestro sistema de comentarios es gestionado por un proveedor externo (Cusdis). Al comentar, puedes hacerlo de forma anónima o con un apodo. La información que proporciones en los comentarios es pública.</p></div></main>"""
+PRIVACY_POLICY_CONTENT = """<main class="article-body" style="margin-top: 2rem;"><h1 class="article-title">Política de Privacidad</h1><div class="article-content"><p><strong>Fecha de vigencia:</strong> 22 de agosto de 2025</p><h2>1. Introducción</h2><p>Bienvenido a sIA. Tu privacidad es de suma importancia para nosotros. Esta Política de Privacidad describe qué datos recopilamos, cómo los usamos, cómo los protegemos y qué opciones tienes sobre tus datos cuando visitas nuestro sitio web.</p><h2>2. Información que Recopilamos</h2><ul><li><strong>Información No Personal:</strong> Recopilamos datos anónimos sobre tu visita (como tipo de navegador, país de origen, etc.) a través de servicios de análisis web para entender mejor a nuestra audiencia. No recopilamos información personal identificable como nombres o correos electrónicos, a menos que te suscribas voluntariamente a nuestro boletín.</li></ul><h2>3. Uso de la Información</h2><p>La información anónima recopilada se utiliza exclusivamente para mejorar el contenido y la experiencia de usuario en nuestro sitio web. Si te suscribes a nuestro boletín, tu correo electrónico se usará únicamente para enviarte nuevas publicaciones.</p><h2>4. Cookies y Terceros</h2><p>Podemos participar en programas de afiliados y redes publicitarias. Estos servicios de terceros pueden usar cookies para mostrar anuncios relevantes. Puedes gestionar tus preferencias en la configuración de cada plataforma respectiva.</p><h2>5. Comentarios</h2><p>Nuestro sistema de comentarios es gestionado por un proveedor externo (Cusdis). Al comentar, puedes hacerlo de forma anónima o con un apodo. La información que proporciones en los comentarios es pública.</p></div></main>"""
 
 def obtener_noticia_real_de_rss():
     print("📡 Buscando noticias reales en RSS...")
@@ -84,7 +80,7 @@ def generar_contenido_ia(categoria, tema):
 
 def reescribir_noticia_con_ia(noticia):
     print("🤖 Reescribiendo noticia real con IA...")
-    system_prompt = "Eres un periodista para 'sIA'. Reescribe noticias de otras fuentes en un artículo original y atractivo. DEBE estar en español."
+    system_prompt = "Eres un periodista para 'sIA'. Reescribe noticias en un artículo original y atractivo. DEBE estar en español."
     user_prompt = f"""Basado en: Título: "{noticia['titulo']}", Resumen: "{noticia['resumen']}", Fuente: "{noticia['link']}", escribe un artículo. Formato JSON: {{"title": "...", "summary": "...", "content_html": "..."}}"""
     try:
         chat_completion = client_groq.chat.completions.create(messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}], model="llama3-8b-8192", response_format={"type": "json_object"})
@@ -153,14 +149,21 @@ def actualizar_paginas(todos_los_posts):
     index_main_content = """<div class="main-container">"""
     if posts_por_categoria["Noticias"]: index_main_content += f"""<h2 class="section-title"><a href="/noticias.html">Últimas Noticias</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Noticias"], 6)}</div>"""
     if posts_por_categoria["Herramientas IA"]: index_main_content += f"""<h2 class="section-title"><a href="/herramientas-ia.html">Herramientas IA</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Herramientas IA"], 3)}</div>"""
-    if posts_por_categoria["Opinión"]: index_main_content += f"""<h2 class="section-title"><a href="/opinión.html">Opinión</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Opinión"], 3)}</div>"""
+    if posts_por_categoria["Opinión"]: index_main_content += f"""<h2 class="section-title"><a href="/opinion.html">Opinión</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Opinión"], 3)}</div>"""
     index_main_content += "</div>"
     full_html_index = HTML_HEADER.format(title="sIA - Inteligencia Artificial en Latinoamérica", summary="Noticias y análisis sobre IA en Latinoamérica.") + index_main_content + HTML_FOOTER
     with open(ROOT_DIR / "index.html", "w", encoding="utf-8") as f: f.write(full_html_index)
 
     for categoria, posts in posts_por_categoria.items():
         if posts:
-            nombre_archivo = f"{categoria.lower().replace(' ', '-')}.html"
+            # --- CORRECCIÓN DE NOMBRES DE ARCHIVO ---
+            if categoria == "Herramientas IA":
+                nombre_archivo = "herramientas-ia.html"
+            elif categoria == "Opinión":
+                nombre_archivo = "opinion.html"
+            else: # Para "Noticias"
+                nombre_archivo = f"{categoria.lower()}.html"
+
             grid_categoria = crear_grid_html(posts, len(posts))
             main_categoria = f"""<div class="main-container"><main class="main-content-full"><h1 class="page-title">Artículos de {categoria}</h1><div class="article-grid">{grid_categoria}</div></main></div>"""
             full_html_categoria = HTML_HEADER.format(title=f"{categoria} - sIA", summary=f"Artículos de {categoria}") + main_categoria + HTML_FOOTER
