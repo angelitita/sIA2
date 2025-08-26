@@ -150,7 +150,7 @@ def actualizar_paginas(todos_los_posts):
     index_main_content = """<div class="main-container">"""
     if posts_por_categoria["Noticias"]: index_main_content += f"""<h2 class="section-title"><a href="/noticias.html">Últimas Noticias</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Noticias"], 6)}</div>"""
     if posts_por_categoria["Herramientas IA"]: index_main_content += f"""<h2 class="section-title"><a href="/herramientas-ia.html">Herramientas IA</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Herramientas IA"], 3)}</div>"""
-    if posts_por_categoria["Opinión"]: index_main_content += f"""<h2 class="section-title"><a href="/opinion.html">Opinión</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Opinión"], 3)}</div>"""
+    if posts_por_categoria["Opinión"]: index_main_content += f"""<h2 class="section-title"><a href="/opinión.html">Opinión</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Opinión"], 3)}</div>"""
     index_main_content += "</div>"
     full_html_index = HTML_HEADER.format(title="sIA - Inteligencia Artificial en Latinoamérica", summary="Noticias y análisis sobre IA en Latinoamérica.") + index_main_content + HTML_FOOTER
     with open(ROOT_DIR / "index.html", "w", encoding="utf-8") as f: f.write(full_html_index)
@@ -200,3 +200,4 @@ if __name__ == "__main__":
     else:
         print("\n❌ No se pudo generar ni encontrar contenido. La ejecución fallará.", file=sys.stderr)
         sys.exit(1)
+
