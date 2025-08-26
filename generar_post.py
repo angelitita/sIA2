@@ -1,4 +1,4 @@
-# --- EJECUTANDO SCRIPT v21.2: VERSIÓN A PRUEBA DE FALLOS ---
+# --- EJECUTANDO SCRIPT v19.3: LÓGICA DE RESPALDO (PLAN B) ---
 import os
 import datetime
 import json
@@ -9,16 +9,12 @@ import feedparser
 from groq import Groq
 from bs4 import BeautifulSoup
 
-print("--- INICIANDO SCRIPT DE GENERACIÓN DE CONTENIDO v21.2 ---")
-
-# --- INTERRUPTOR DE REPARACIÓN ---
-RECONSTRUIR_POSTS_ANTIGUOS = False
+print("--- INICIANDO SCRIPT DE GENERACIÓN DE CONTENIDO v19.3 ---")
 
 # --- CONFIGURACIÓN ---
 CUSDIS_APP_ID = "f6cbff1c-928c-4ac4-b85a-c76024284179"
 RSS_FEEDS = ["https://www.infobae.com/feeds/rss/america/tecno/", "https://es.wired.com/feed/rss", "https://www.xataka.com/tag/inteligencia-artificial/feed/"]
-HISTORIAL_NOTICIAS_FILE = Path("historial_noticias.txt")
-HISTORIAL_TITULOS_FILE = Path("historial_titulos.txt")
+HISTORIAL_FILE = Path("historial_noticias.txt")
 try:
     api_key_main = os.getenv("GROQ_API_KEY")
     if not api_key_main: sys.exit("❌ Error: GROQ_API_KEY no configurada.")
@@ -38,7 +34,7 @@ except Exception:
 POSTS_DIR = Path("posts")
 ROOT_DIR = Path(".")
 
-temas_opinion = ["una columna de opinión sobre el Rabbit R1.", "un análisis crítico de las gafas Ray-Ban Meta.", "una opinión sobre Suno AI."]
+temas_opinion = ["una columna de opinión sobre el Rabbit R1. ¿Es una revolución o un fracaso?", "un análisis crítico de las gafas Ray-Ban Meta. ¿Son realmente útiles?", "una opinión sobre Suno AI para la creación de música."]
 temas_herramientas = ["una comparativa detallada: Midjourney vs. Stable Diffusion.", "una guía de las 5 mejores IAs para editar video.", "una reseña a fondo de Notion AI."]
 
 # --- PLANTILLAS HTML ---
@@ -51,107 +47,158 @@ HTML_HEADER = """<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><met
     <a href="https://docs.google.com/forms/d/e/1FAIpQLSeNl4keU0p1eDMvzUpM5p57Naf5qBMsl5MSJNBMxPnWbofshQ/viewform?usp=header" target="_blank" class="subscribe-button desktop-nav">Suscríbete</a>
     <button class="hamburger-menu" aria-label="Abrir menú"><span></span></button>
 </header>
-<div class="mobile-nav"><nav><ul><li><a href="/noticias.html">Noticias</a></li><li><a href="/herramientas-ia.html">Herramientas IA</a></li><li><a href="/opinion.html">Opinión</a></li><li><a href="/acerca-de.html">Acerca de</a></li><li><a href="/contacto.html">Contacto</a></li></ul></nav><a href="https://docs.google.com/forms/d/e/1FAIpQLSeNl4keU0p1eDMvzUpM5p57Naf5qBMsl5MSJNBMxPnWbofshQ/viewform?usp=header" target="_blank" class="subscribe-button">Suscríbete</a></div>"""
-HTML_FOOTER = """<footer><p>&copy; 2025 sIA. Todos los derechos reservados.</p><p><a href="/privacy.html">Política de Privacidad</a> | <a href="/acerca-de.html">Acerca de</a> | <a href="/contacto.html">Contacto</a></p></footer><script>const hamburger = document.querySelector('.hamburger-menu');const mobileNav = document.querySelector('.mobile-nav');const body = document.querySelector('body');hamburger.addEventListener('click', () => {hamburger.classList.toggle('is-active');mobileNav.classList.toggle('is-active');body.classList.toggle('no-scroll');});</script></body></html>"""
-PRIVACY_POLICY_CONTENT = """<main class="article-body" style="margin-top: 2rem;"><h1 class="article-title">Política de Privacidad</h1><div class="article-content"><p><strong>Fecha de vigencia:</strong> 26 de agosto de 2025</p><p>En sIA ("nosotros", "nuestro"), respetamos su privacidad y nos comprometemos a protegerla...</p></div></main>"""
-ACERCA_DE_CONTENT = """<main class="article-body" style="margin-top: 2rem;"><h1 class="article-title">Acerca de sIA</h1><div class="article-content"><h2>Nuestra Misión</h2><p>Nuestra misión es ser la fuente de información de referencia para entusiastas, profesionales y curiosos de la IA en Latinoamérica...</p></div></main>"""
-CONTACTO_CONTENT = """<main class="article-body" style="margin-top: 2rem;"><h1 class="article-title">Contacto</h1><div class="article-content"><p>¿Tienes alguna pregunta, sugerencia o quieres colaborar? Utiliza el formulario a continuación.</p><form name="contact" method="POST" data-netlify="true" class="contact-form">...</form></div></main>"""
+<div class="mobile-nav"><nav><ul><li><a href="/noticias.html">Noticias</a></li><li><a href="/herramientas-ia.html">Herramientas IA</a></li><li><a href="/opinion.html">Opinión</a></li></ul></nav><a href="https://docs.google.com/forms/d/e/1FAIpQLSeNl4keU0p1eDMvzUpM5p57Naf5qBMsl5MSJNBMxPnWbofshQ/viewform?usp=header" target="_blank" class="subscribe-button">Suscríbete</a></div>"""
+HTML_FOOTER = """<footer><p>&copy; 2025 sIA. Todos los derechos reservados.</p><p><a href="/privacy.html">Política de Privacidad</a></p></footer><script>const hamburger = document.querySelector('.hamburger-menu');const mobileNav = document.querySelector('.mobile-nav');const body = document.querySelector('body');hamburger.addEventListener('click', () => {hamburger.classList.toggle('is-active');mobileNav.classList.toggle('is-active');body.classList.toggle('no-scroll');});</script></body></html>"""
+PRIVACY_POLICY_CONTENT = """<main class="article-body" style="margin-top: 2rem;"><h1 class="article-title">Política de Privacidad</h1><div class="article-content"><p><strong>Fecha de vigencia:</strong> 22 de agosto de 2025</p><h2>1. Introducción</h2><p>Bienvenido a sIA. Tu privacidad es de suma importancia para nosotros. Esta Política de Privacidad describe qué datos recopilamos, cómo los usamos, cómo los protegemos y qué opciones tienes sobre tus datos cuando visitas nuestro sitio web.</p><h2>2. Información que Recopilamos</h2><ul><li><strong>Información No Personal:</strong> Recopilamos datos anónimos sobre tu visita (como tipo de navegador, país de origen, etc.) a través de servicios de análisis web para entender mejor a nuestra audiencia. No recopilamos información personal identificable como nombres o correos electrónicos, a menos que te suscribas voluntariamente a nuestro boletín.</li></ul><h2>3. Uso de la Información</h2><p>La información anónima recopilada se utiliza exclusivamente para mejorar el contenido y la experiencia de usuario en nuestro sitio web. Si te suscribes a nuestro boletín, tu correo electrónico se usará únicamente para enviarte nuevas publicaciones.</p><h2>4. Cookies y Terceros</h2><p>Podemos participar en programas de afiliados y redes publicitarias. Estos servicios de terceros pueden usar cookies para mostrar anuncios relevantes. Puedes gestionar tus preferencias en la configuración de cada plataforma respectiva.</p><h2>5. Comentarios</h2><p>Nuestro sistema de comentarios es gestionado por un proveedor externo (Cusdis). Al comentar, puedes hacerlo de forma anónima o con un apodo. La información que proporciones en los comentarios es pública.</p></div></main>"""
 
 # --- LÓGICA DE CONTENIDO ---
-def obtener_noticia_real_de_rss(historial_links):
-    # ... (código sin cambios)
-    pass
-def generar_contenido_ia(categoria, tema, historial_titulos):
-    # ... (código sin cambios)
-    pass
-def reescribir_noticia_con_ia(noticia, historial_titulos):
-    # ... (código sin cambios)
-    pass
-def leer_historial(archivo, max_lineas=50):
-    # ... (código sin cambios)
-    pass
-def escribir_historial(archivo, nuevo_item, max_lineas=50):
-    # ... (código sin cambios)
-    pass
+def obtener_noticia_real_de_rss():
+    print("📡 Buscando noticias reales en RSS...")
+    if not HISTORIAL_FILE.exists(): HISTORIAL_FILE.touch()
+    with open(HISTORIAL_FILE, "r", encoding="utf-8") as f:
+        historial = [line.strip() for line in f.readlines()]
+    for feed_url in RSS_FEEDS:
+        feed = feedparser.parse(feed_url)
+        if feed.entries:
+            noticia = feed.entries[0]
+            if noticia.link not in historial:
+                print(f"✅ Noticia real encontrada: '{noticia.title}'")
+                return {"titulo": noticia.title, "link": noticia.link, "resumen": BeautifulSoup(noticia.summary, "html.parser").get_text(separator=' ', strip=True)}
+    return None
+
+def generar_contenido_ia(categoria, tema):
+    print(f"🤖 Generando contenido IA para '{categoria}' sobre '{tema}'...")
+    system_prompt = f"Eres un experto en IA para el blog 'sIA'. Escribe un artículo de '{categoria}'. El artículo DEBE estar en español."
+    user_prompt = f"""Escribe un artículo sobre: '{tema}'. Formato JSON: {{"title": "...", "summary": "...", "content_html": "..."}}"""
+    try:
+        chat_completion = client_groq.chat.completions.create(messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}], model="llama3-8b-8192", response_format={"type": "json_object"})
+        contenido = json.loads(chat_completion.choices[0].message.content)
+        contenido['category'] = categoria
+        return contenido
+    except Exception as e:
+        print(f"⚠️  Error al generar contenido IA para '{categoria}': {e}", file=sys.stderr)
+        return None
+
+def reescribir_noticia_con_ia(noticia):
+    print("🤖 Reescribiendo noticia real con IA...")
+    system_prompt = "Eres un periodista para 'sIA'. Reescribe noticias en un artículo original y atractivo. DEBE estar en español."
+    user_prompt = f"""Basado en: Título: "{noticia['titulo']}", Resumen: "{noticia['resumen']}", Fuente: "{noticia['link']}", escribe un artículo. Formato JSON: {{"title": "...", "summary": "...", "content_html": "..."}}"""
+    try:
+        chat_completion = client_groq.chat.completions.create(messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}], model="llama3-8b-8192", response_format={"type": "json_object"})
+        contenido = json.loads(chat_completion.choices[0].message.content)
+        contenido['source_link'] = noticia['link']
+        contenido['category'] = "Noticias"
+        return contenido
+    except Exception as e:
+        print(f"❌ Error al reescribir noticia: {e}", file=sys.stderr)
+        return None
 
 # --- FUNCIONES DE CREACIÓN DE PÁGINAS ---
 def get_post_details(file_path):
-    # ... (código sin cambios)
-    pass
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            soup = BeautifulSoup(f, "html.parser")
+        title_tag = soup.find("h1", class_="article-title")
+        title = title_tag.get_text(strip=True) if title_tag else "Sin Título"
+        category_tag = soup.find("span", class_="category-tag")
+        category = category_tag.get_text(strip=True) if category_tag else "Noticias"
+        return title, category
+    except Exception: return "Sin Título", "Noticias"
+
 def crear_archivo_post(contenido, todos_los_posts):
-    # ... (código sin cambios)
-    pass
+    POSTS_DIR.mkdir(exist_ok=True)
+    fecha_actual = datetime.datetime.now().strftime("%d de %B de %Y")
+    slug_base = contenido["title"].lower().replace(" ", "-").replace(":", "").replace("?", "").replace("¿", "")
+    slug = f"{slug_base[:50]}-{datetime.datetime.now().strftime('%H%M%S')}"
+    nombre_archivo = f"{datetime.date.today().strftime('%Y-%m-%d')}-{slug}.html"
+    related_posts_html = ""
+    posts_aleatorios = [p for p in todos_los_posts if p.name != nombre_archivo]
+    random.shuffle(posts_aleatorios)
+    posts_relacionados = posts_aleatorios[:3]
+    cards_html = ""
+    for post_path in posts_relacionados:
+        title, category = get_post_details(post_path)
+        if title != "Sin Título":
+            imagen_aleatoria = random.choice(LISTA_DE_IMAGENES)
+            cards_html += f"""<article class="article-card"><a href="/{post_path.as_posix()}"><img src="/static/img/{imagen_aleatoria}" alt="{title}"></a><div class="card-content"><span class="category-tag {category.replace(' ', '-')}">{category}</span><h3><a href="/{post_path.as_posix()}">{title}</a></h3></div></article>"""
+    if cards_html: related_posts_html = f"""<section class="related-articles"><h2>Artículos que podrían interesarte</h2><div class="article-grid">{cards_html}</div></section>"""
+    comments_section_html = f"""<section class="comments-section"><h2>Comentarios</h2><div id="cusdis_thread" data-host="https://cusdis.com" data-app-id="{CUSDIS_APP_ID}" data-page-id="{nombre_archivo}" data-page-url="/posts/{nombre_archivo}" data-page-title="{contenido['title']}"></div><script async defer src="https://cusdis.com/js/cusdis.es.js"></script></section>"""
+    source_html = f'<p><em>Fuente original: <a href="{contenido.get("source_link", "#")}" target="_blank" rel="noopener noreferrer">Leer más</a></em></p>' if 'source_link' in contenido else ''
+    article_html = f"""<main class="article-body"><article><h1 class="article-title">{contenido['title']}</h1><p class="article-meta">Publicado por Redacción sIA el {fecha_actual} en <span class="category-tag {contenido['category'].replace(' ', '-')}">{contenido['category']}</span></p><div class="article-content">{contenido['content_html']}{source_html}</div></article>{comments_section_html}{related_posts_html}</main>"""
+    full_html = HTML_HEADER.format(title=contenido['title'], summary=contenido.get('summary', '')) + article_html + HTML_FOOTER
+    with open(POSTS_DIR / nombre_archivo, "w", encoding="utf-8") as f: f.write(full_html)
+    print(f"📄 Archivo de post creado: {nombre_archivo}")
+    if 'source_link' in contenido:
+        with open(HISTORIAL_FILE, "a", encoding="utf-8") as f: f.write(contenido['source_link'] + "\n")
+
 def actualizar_paginas(todos_los_posts):
-    # ... (código sin cambios)
-    pass
+    print("🔄 Actualizando páginas (index, categorías, etc.)...")
+    posts_por_categoria = {"Noticias": [], "Herramientas IA": [], "Opinión": []}
+    for post in todos_los_posts:
+        title, category = get_post_details(post)
+        if title != "Sin Título" and category in posts_por_categoria:
+            posts_por_categoria[category].append(post)
+
+    def crear_grid_html(posts, num_items):
+        grid_html = ""
+        for post_path in posts[:num_items]:
+            title, category = get_post_details(post_path)
+            if title:
+                imagen_aleatoria = random.choice(LISTA_DE_IMAGENES)
+                grid_html += f"""<article class="article-card"><a href="/{post_path.as_posix()}"><img src="/static/img/{imagen_aleatoria}" alt="{title}"></a><div class="card-content"><span class="category-tag {category.replace(' ', '-')}">{category}</span><h3><a href="/{post_path.as_posix()}">{title}</a></h3></div></article>"""
+        return grid_html
+
+    index_main_content = """<div class="main-container">"""
+    if posts_por_categoria["Noticias"]: index_main_content += f"""<h2 class="section-title"><a href="/noticias.html">Últimas Noticias</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Noticias"], 6)}</div>"""
+    if posts_por_categoria["Herramientas IA"]: index_main_content += f"""<h2 class="section-title"><a href="/herramientas-ia.html">Herramientas IA</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Herramientas IA"], 3)}</div>"""
+    if posts_por_categoria["Opinión"]: index_main_content += f"""<h2 class="section-title"><a href="/opinion.html">Opinión</a></h2><div class="article-grid">{crear_grid_html(posts_por_categoria["Opinión"], 3)}</div>"""
+    index_main_content += "</div>"
+    full_html_index = HTML_HEADER.format(title="sIA - Inteligencia Artificial en Latinoamérica", summary="Noticias y análisis sobre IA en Latinoamérica.") + index_main_content + HTML_FOOTER
+    with open(ROOT_DIR / "index.html", "w", encoding="utf-8") as f: f.write(full_html_index)
+
+    for categoria, posts in posts_por_categoria.items():
+        if posts:
+            nombre_archivo = f"{categoria.lower().replace(' ', '-')}.html"
+            grid_categoria = crear_grid_html(posts, len(posts))
+            main_categoria = f"""<div class="main-container"><main class="main-content-full"><h1 class="page-title">Artículos de {categoria}</h1><div class="article-grid">{grid_categoria}</div></main></div>"""
+            full_html_categoria = HTML_HEADER.format(title=f"{categoria} - sIA", summary=f"Artículos de {categoria}") + main_categoria + HTML_FOOTER
+            with open(ROOT_DIR / nombre_archivo, "w", encoding="utf-8") as f: f.write(full_html_categoria)
+
 def crear_pagina_privacidad():
-    # ... (código sin cambios)
-    pass
-def crear_pagina_acerca_de():
-    # ... (código sin cambios)
-    pass
-def crear_pagina_contacto():
-    # ... (código sin cambios)
-    pass
-def reparar_posts_antiguos(todos_los_posts):
-    # ... (código sin cambios)
-    pass
+    full_html = HTML_HEADER.format(title="Política de Privacidad - sIA", summary="Política de Privacidad de sIA News.") + PRIVACY_POLICY_CONTENT + HTML_FOOTER
+    with open(ROOT_DIR / "privacy.html", "w", encoding="utf-8") as f: f.write(full_html)
 
-# --- BLOQUE DE EJECUCIÓN PRINCIPAL (A PRUEBA DE FALLOS) ---
 if __name__ == "__main__":
-    # Asegurarse de que los archivos de historial existan
-    if not HISTORIAL_NOTICIAS_FILE.exists(): HISTORIAL_NOTICIAS_FILE.touch()
-    if not HISTORIAL_TITULOS_FILE.exists(): HISTORIAL_TITULOS_FILE.touch()
+    contenido_final = None
+    noticia_real = obtener_noticia_real_de_rss()
     
-    # El script intentará generar contenido nuevo.
-    # Si esta parte falla, el script continuará para al menos reconstruir las páginas.
-    try:
-        if RECONSTRUIR_POSTS_ANTIGUOS:
-            posts_actuales = sorted(list(POSTS_DIR.glob("*.html")), key=lambda p: p.name, reverse=True)
-            reparar_posts_antiguos(posts_actuales)
-        else:
-            historial_links = leer_historial(HISTORIAL_NOTICIAS_FILE)
-            historial_titulos = leer_historial(HISTORIAL_TITULOS_FILE)
-            contenido_final = None
-            noticia_real = obtener_noticia_real_de_rss(historial_links)
-            
-            if noticia_real:
-                contenido_final = reescribir_noticia_con_ia(noticia_real, historial_titulos)
-            else:
-                print("ℹ️ No hubo noticias reales nuevas, se generará contenido IA original.")
-                opciones_ia = [("Opinión", temas_opinion), ("Herramientas IA", temas_herramientas)]
-                random.shuffle(opciones_ia)
-                for i, (categoria, temas) in enumerate(opciones_ia):
-                    print(f"✨ Intentando Plan {'A' if i == 0 else 'B'}: Generar '{categoria}'...")
-                    if temas:
-                        tema_elegido = random.choice(temas)
-                        contenido_final = generar_contenido_ia(categoria, tema_elegido, historial_titulos)
-                        if contenido_final:
-                            break
-            
-            if contenido_final:
-                posts_actuales = sorted(list(POSTS_DIR.glob("*.html")), key=lambda p: p.name, reverse=True)
-                crear_archivo_post(contenido_final, posts_actuales)
-            else:
-                print("\n⚠️  No se pudo generar contenido nuevo en esta ejecución.")
-
-    except Exception as e:
-        print(f"❌ Ocurrió un error durante la generación de contenido: {e}", file=sys.stderr)
-
-    # --- FLUJO A PRUEBA DE FALLOS ---
-    # Al final, SIEMPRE intenta reconstruir las páginas con lo que sea que exista.
-    # Esto garantiza que el sitio nunca se quede en blanco.
-    print("\n🔧 Ejecutando fase final de reconstrucción de páginas...")
-    try:
-        posts_actualizados = sorted(list(POSTS_DIR.glob("*.html")), key=lambda p: p.name, reverse=True)
-        if not posts_actualizados and not RECONSTRUIR_POSTS_ANTIGUOS:
-             print("️️⚠️ No hay posts existentes y no se generó uno nuevo. La página principal podría quedar vacía.")
+    if noticia_real:
+        contenido_final = reescribir_noticia_con_ia(noticia_real)
+    else:
+        print("ℹ️ No hubo noticias reales nuevas, se generará contenido IA original.")
+        opciones_ia = [("Opinión", temas_opinion), ("Herramientas IA", temas_herramientas)]
+        random.shuffle(opciones_ia) # Mezcla las opciones para que no siempre intente la misma primero
         
+        # --- NUEVO: Lógica de Plan B ---
+        # Intenta la primera opción
+        categoria_1, temas_1 = opciones_ia[0]
+        tema_1 = random.choice(temas_1)
+        contenido_final = generar_contenido_ia(categoria_1, tema_1)
+
+        # Si falla, intenta la segunda opción (Plan B)
+        if not contenido_final:
+            print("⚠️  El Plan A falló. Intentando el Plan B...")
+            categoria_2, temas_2 = opciones_ia[1]
+            tema_2 = random.choice(temas_2)
+            contenido_final = generar_contenido_ia(categoria_2, tema_2)
+
+    if contenido_final:
+        posts_actuales = sorted(list(POSTS_DIR.glob("*.html")), key=lambda p: p.name, reverse=True)
+        crear_archivo_post(contenido_final, posts_actuales)
+        posts_actualizados = sorted(list(POSTS_DIR.glob("*.html")), key=lambda p: p.name, reverse=True)
         actualizar_paginas(posts_actualizados)
         crear_pagina_privacidad()
-        crear_pagina_acerca_de()
-        crear_pagina_contacto()
         print("\n🎉 ¡Proceso completado exitosamente!")
-    except Exception as e:
-        print(f"❌ Error CRÍTICO durante la reconstrucción de páginas. El sitio puede estar roto. Error: {e}", file=sys.stderr)
+    else:
+        print("\n❌ No se pudo generar contenido ni con el Plan B. La ejecución fallará.", file=sys.stderr)
         sys.exit(1)
