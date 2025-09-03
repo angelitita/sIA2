@@ -204,7 +204,7 @@ def generar_contenido_ia(categoria, tema):
     try:
         chat_completion = client_groq.chat.completions.create(
             messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
-            model="llama3-70b-8192",
+            model="llama-3.1-8b-instant",
             response_format={"type": "json_object"},
         )
         contenido = load_json_safe(chat_completion.choices[0].message.content)
@@ -231,7 +231,7 @@ def reescribir_noticia_con_ia(noticia):
     try:
         chat_completion = client_groq.chat.completions.create(
             messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
-            model="llama3-70b-8192",
+            model="llama-3.1-8b-instant",
             response_format={"type": "json_object"},
         )
         contenido = load_json_safe(chat_completion.choices[0].message.content)
@@ -542,3 +542,4 @@ if __name__ == "__main__":
     else:
         print("\n❌ No se pudo generar ni encontrar contenido. La ejecución fallará.", file=sys.stderr)
         sys.exit(1)
+
