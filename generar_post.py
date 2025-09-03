@@ -106,6 +106,7 @@ def sanitize_html(html: str) -> str:
 HTML_HEADER = """<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"UTF-8\">
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
 <title>{title}</title><meta name=\"description\" content=\"{summary}\">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6306514511826618" crossorigin="anonymous"></script>
 <!-- SEO OpenGraph -->
 <meta property=\"og:title\" content=\"{title}\">
 <meta property=\"og:description\" content=\"{summary}\">
@@ -541,3 +542,4 @@ if __name__ == "__main__":
     else:
         print("\n❌ No se pudo generar ni encontrar contenido. La ejecución fallará.", file=sys.stderr)
         sys.exit(1)
+
