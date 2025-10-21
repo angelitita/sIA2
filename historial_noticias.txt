@@ -265,3 +265,4 @@ https://es.wired.com/articulos/zohran-mamdani-hablamos-con-el-candidato-proinmig
 https://es.wired.com/articulos/gemini-ya-es-el-cerebro-de-google-home-pero-sigue-confundiendo-a-mi-perro-con-un-gato
 https://es.wired.com/articulos/las-gafas-con-ia-se-perfilan-seriamente-para-heredar-el-trono-del-smartphone
 https://es.wired.com/articulos/arranca-el-mexico-tech-week-el-festival-tecnologico-en-la-ciudad-de-mexico
+https://es.wired.com/articulos/openai-lanza-chatgpt-atlas-un-nuevo-navegador-con-ia-que-desafia-a-google-chrome
