@@ -660,3 +660,4 @@ https://es.wired.com/articulos/neurocientificos-descifran-la-procrastinacion-un-
 https://es.wired.com/articulos/cosas-que-debes-saber-antes-importar-un-telefono-chino
 https://es.wired.com/articulos/la-microgravedad-literalmente-estira-el-cerebro-de-los-astronautas
 https://es.wired.com/articulos/un-nuevo-calculo-borra-de-un-plumazo-la-posibilidad-de-vida-compleja-en-el-80-de-sistemas-estelares-del-universo
+https://es.wired.com/articulos/como-usar-claude-cowork-el-nuevo-agente-de-anthropic-que-te-permite-automatizar-tareas-sin-saber-programar
