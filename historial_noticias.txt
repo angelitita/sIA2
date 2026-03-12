@@ -933,3 +933,4 @@ https://es.wired.com/articulos/meta-compro-moltbook-la-red-social-donde-bots-con
 https://es.wired.com/articulos/mexico-firma-acuerdo-con-google-meta-y-tiktok-para-combatir-la-violencia-digital-de-genero
 https://es.wired.com/articulos/la-carrera-contrarreloj-de-openai-por-alcanzar-a-claude-code-de-anthropic
 https://es.wired.com/articulos/google-maps-integrara-gemini-para-crear-viajes-inteligentes-en-su-mayor-actualizacion-en-una-decada
+https://es.wired.com/articulos/una-nueva-era-de-desinformacion-esta-aqui-la-ia-ya-coordina-campanas-de-propaganda-de-manera-autonoma
