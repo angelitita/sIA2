@@ -1053,3 +1053,4 @@ https://es.wired.com/articulos/una-enfermedad-falsa-pone-en-evidencia-la-incapac
 https://es.wired.com/articulos/hackers-ligados-a-iran-sabotean-agua-y-energia-en-ee-uu-tras-las-amenazas-de-trump
 https://es.wired.com/articulos/los-chatbots-dieron-por-falsas-las-fotos-de-la-mision-artemis-ii-a-la-luna-y-eso-es-un-problema-grave
 https://es.wired.com/articulos/las-huellas-de-la-guerra-en-los-hospitales-de-gaza
+https://es.wired.com/articulos/las-respuestas-de-google-generadas-con-ia-fallan-1-de-cada-10-veces
