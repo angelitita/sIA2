@@ -1097,3 +1097,4 @@ https://es.wired.com/articulos/la-materia-oscura-podria-estar-conformada-de-los-
 https://es.wired.com/articulos/google-vuelve-mas-intuitivo-a-chrome-con-estas-nuevas-herramientas-de-ia
 https://es.wired.com/articulos/la-ia-ya-controla-1-de-cada-3-sitios-web-nuevos-llenando-internet-de-felicidad-falsa
 https://es.wired.com/articulos/los-fans-apoyan-la-filtracion-de-avatar-el-ultimo-maestro-del-aire-porque-no-estan-contentos-con-paramount
+https://es.wired.com/articulos/los-modelos-de-ia-pueden-heredar-sesgos-ocultos-al-entrenarse-con-los-datos-sinteticos-de-otros-sistemas
