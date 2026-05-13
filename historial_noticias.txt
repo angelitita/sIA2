@@ -1221,3 +1221,4 @@ https://es.wired.com/articulos/los-19-modelos-del-salon-del-automovil-de-pekin-2
 https://es.wired.com/articulos/como-desactivar-gemini-en-chrome-si-no-quieres-usarlo
 https://es.wired.com/articulos/mas-de-270-anos-de-ingenieria-en-relojes-para-el-fondo-del-mar-asi-son-los-nuevos-modelos-de-blancpain
 https://es.wired.com/articulos/todo-lo-que-tienes-que-saber-sobre-el-hantavirus-explicado-por-un-infectologo
+https://es.wired.com/articulos/google-alerta-sobre-hackers-que-ya-utilizan-ia-para-crear-exploits-de-dia-cero
