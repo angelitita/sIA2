@@ -1250,3 +1250,4 @@ https://es.wired.com/articulos/trionda-primer-balon-mundialista-de-cuatro-panele
 https://es.wired.com/review/probamos-el-logitech-pro-x2-superstrike-el-mouse-gamer-mas-avanzado-que-tiene-la-marca
 https://es.wired.com/articulos/decreto-federal-amenaza-habitat-de-la-ballena-azul-en-puerto-loreto-denuncian-organizaciones
 https://es.wired.com/articulos/el-bostezo-contagioso-podria-remontarse-a-antes-del-nacimiento
+https://es.wired.com/articulos/asi-pude-crear-una-app-sin-saber-nada-de-programacion
