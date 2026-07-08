@@ -1443,3 +1443,4 @@ https://es.wired.com/articulos/la-sonda-hayabusa-2-cumple-su-historica-mision-y-
 https://es.wired.com/articulos/la-onu-respalda-una-coalicion-internacional-liderada-por-espana-para-proteger-a-las-infancias-de-la-ia
 https://es.wired.com/articulos/claude-ahora-sigue-trabajando-aunque-cierres-la-laptop
 https://es.wired.com/articulos/ia-para-el-bien-como-los-gigantes-tecnologicos-se-aduenaron-de-la-nueva-comision-de-la-onu
+https://es.wired.com/articulos/como-evitar-que-google-use-tus-fotos-y-videos-para-entrenar-su-ia
