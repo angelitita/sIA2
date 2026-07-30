@@ -1546,3 +1546,4 @@ https://es.wired.com/articulos/nueva-evidencia-sugiere-que-la-amazonia-albergo-u
 https://es.wired.com/articulos/cortos-hechos-con-ia-llegan-al-festival-internacional-de-cine-de-guanajuato
 https://es.wired.com/articulos/la-polemica-sobre-el-examen-de-la-unam-esta-lejos-de-terminar
 https://es.wired.com/articulos/por-favor-nunca-metas-plastico-en-el-microondas
+https://es.wired.com/articulos/python-es-terriblemente-lento-podra-julia-resolver-el-problema-de-los-dos-lenguajes
