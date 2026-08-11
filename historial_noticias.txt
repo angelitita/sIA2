@@ -1606,3 +1606,4 @@ https://es.wired.com/articulos/como-vamos-con-el-cambio-climatico-segun-las-cifr
 https://es.wired.com/articulos/las-neuronas-del-anticristo-la-furia-politica-contra-los-centros-de-datos-y-la-ia-en-estados-unidos
 https://es.wired.com/articulos/el-futuro-de-los-autos-electricos-en-mexico-esta-en-la-cadena-de-suministro-no-solo-en-las-ventas
 https://es.wired.com/articulos/el-razonamiento-oculto-de-claude-y-chatgpt-podria-estar-ayudando-a-entrenar-modelos-chinos
+https://es.wired.com/articulos/un-fallo-al-compartir-pantalla-en-zoom-dejaba-tu-computadora-expuesta-a-hackers
